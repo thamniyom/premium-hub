@@ -304,7 +304,7 @@ class _ServiceIcon extends StatelessWidget {
   final IconData icon;
   final String label;
 
-  const _ServiceIcon({super.key, required this.icon, required this.label});
+  const _ServiceIcon({required this.icon, required this.label});
 
   @override
   Widget build(BuildContext context) {

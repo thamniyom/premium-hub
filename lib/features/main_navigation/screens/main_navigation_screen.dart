@@ -50,27 +50,42 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   _NavBarItem(
                     icon: LucideIcons.home,
                     isSelected: currentIndex == 0,
-                    onTap: () { LogService.tabChanged(0); appState.setNavigationIndex(0); },
+                    onTap: () {
+                      LogService.tabChanged(0);
+                      appState.setNavigationIndex(0);
+                    },
                   ),
                   _NavBarItem(
                     icon: LucideIcons.search,
                     isSelected: currentIndex == 1,
-                    onTap: () { LogService.tabChanged(1); appState.setNavigationIndex(1); },
+                    onTap: () {
+                      LogService.tabChanged(1);
+                      appState.setNavigationIndex(1);
+                    },
                   ),
                   _NavBarItem(
                     icon: LucideIcons.calendar,
                     isSelected: currentIndex == 2,
-                    onTap: () { LogService.tabChanged(2); appState.setNavigationIndex(2); },
+                    onTap: () {
+                      LogService.tabChanged(2);
+                      appState.setNavigationIndex(2);
+                    },
                   ),
                   _NavBarItem(
                     icon: LucideIcons.messageSquare,
                     isSelected: currentIndex == 3,
-                    onTap: () { LogService.tabChanged(3); appState.setNavigationIndex(3); },
+                    onTap: () {
+                      LogService.tabChanged(3);
+                      appState.setNavigationIndex(3);
+                    },
                   ),
                   _NavBarItem(
                     icon: LucideIcons.user,
                     isSelected: currentIndex == 4,
-                    onTap: () { LogService.tabChanged(4); appState.setNavigationIndex(4); },
+                    onTap: () {
+                      LogService.tabChanged(4);
+                      appState.setNavigationIndex(4);
+                    },
                   ),
                 ],
               ),
@@ -88,7 +103,6 @@ class _NavBarItem extends StatelessWidget {
   final VoidCallback onTap;
 
   const _NavBarItem({
-    super.key,
     required this.icon,
     required this.isSelected,
     required this.onTap,

@@ -13,7 +13,7 @@ import '../../admin/screens/admin_dashboard_screen.dart';
 import '../../../core/services/log_service.dart';
 
 class HomeScreen04 extends StatelessWidget {
-  const HomeScreen04({Key? key}) : super(key: key);
+  const HomeScreen04({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -478,12 +478,7 @@ class _ServiceIcon extends StatelessWidget {
   final String label;
   final VoidCallback? onTap;
 
-  const _ServiceIcon({
-    super.key,
-    required this.icon,
-    required this.label,
-    this.onTap,
-  });
+  const _ServiceIcon({required this.icon, required this.label, this.onTap});
 
   @override
   Widget build(BuildContext context) {

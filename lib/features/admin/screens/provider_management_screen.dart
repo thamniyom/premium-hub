@@ -4,6 +4,7 @@ import '../../../core/services/log_service.dart';
 import '../../services/models/service_provider.dart';
 import 'provider_edit_screen.dart';
 import 'provider_service_history_screen.dart';
+import 'provider_add_screen.dart';
 
 class ProviderManagementScreen extends StatefulWidget {
   const ProviderManagementScreen({super.key});
@@ -34,9 +35,11 @@ class _ProviderManagementScreenState extends State<ProviderManagementScreen> {
   void _filterProviders(String query) {
     setState(() {
       _filteredProviders = _allProviders
-          .where((p) =>
-              p.name.toLowerCase().contains(query.toLowerCase()) ||
-              p.category.toLowerCase().contains(query.toLowerCase()))
+          .where(
+            (p) =>
+                p.name.toLowerCase().contains(query.toLowerCase()) ||
+                p.category.toLowerCase().contains(query.toLowerCase()),
+          )
           .toList();
     });
   }
@@ -58,7 +61,7 @@ class _ProviderManagementScreenState extends State<ProviderManagementScreen> {
 
       // Update filtered list
       _filteredProviders[index] = updatedProvider;
-      
+
       // Update master list
       final masterIndex = _allProviders.indexWhere((item) => item.id == p.id);
       if (masterIndex != -1) {
@@ -75,19 +78,44 @@ class _ProviderManagementScreenState extends State<ProviderManagementScreen> {
   void _updateProvider(ServiceProvider updatedProvider) {
     setState(() {
       // Update master list
-      final masterIndex =
-          _allProviders.indexWhere((p) => p.id == updatedProvider.id);
+      final masterIndex = _allProviders.indexWhere(
+        (p) => p.id == updatedProvider.id,
+      );
       if (masterIndex != -1) {
         _allProviders[masterIndex] = updatedProvider;
       }
 
       // Update filtered list (if it's currently showing)
-      final filteredIndex =
-          _filteredProviders.indexWhere((p) => p.id == updatedProvider.id);
+      final filteredIndex = _filteredProviders.indexWhere(
+        (p) => p.id == updatedProvider.id,
+      );
       if (filteredIndex != -1) {
         _filteredProviders[filteredIndex] = updatedProvider;
       }
     });
+  }
+
+  Future<void> _openAddProvider() async {
+    LogService.info('Opening Add Provider screen');
+    final newProvider = await Navigator.push<ServiceProvider>(
+      context,
+      MaterialPageRoute(builder: (context) => const ProviderAddScreen()),
+    );
+
+    if (newProvider != null) {
+      setState(() {
+        _allProviders.insert(0, newProvider);
+        _filteredProviders.insert(0, newProvider);
+      });
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${newProvider.name} added successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -105,6 +133,14 @@ class _ProviderManagementScreenState extends State<ProviderManagementScreen> {
             Navigator.pop(context);
           },
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Add New Provider',
+            icon: const Icon(LucideIcons.plusCircle, color: Colors.amber),
+            onPressed: _openAddProvider,
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SafeArea(
         child: Column(
@@ -121,7 +157,11 @@ class _ProviderManagementScreenState extends State<ProviderManagementScreen> {
                   decoration: const InputDecoration(
                     hintText: 'Search provider name or category...',
                     hintStyle: TextStyle(color: Colors.white24),
-                    icon: Icon(LucideIcons.search, color: Colors.amber, size: 20),
+                    icon: Icon(
+                      LucideIcons.search,
+                      color: Colors.amber,
+                      size: 20,
+                    ),
                     border: InputBorder.none,
                   ),
                 ),
@@ -153,8 +193,9 @@ class _ProviderManagementScreenState extends State<ProviderManagementScreen> {
                                   children: [
                                     CircleAvatar(
                                       radius: 28,
-                                      backgroundImage:
-                                          NetworkImage(provider.imageUrl),
+                                      backgroundImage: NetworkImage(
+                                        provider.imageUrl,
+                                      ),
                                     ),
                                     const SizedBox(width: 16),
                                     Expanded(
@@ -183,9 +224,10 @@ class _ProviderManagementScreenState extends State<ProviderManagementScreen> {
                                     Switch(
                                       value: provider.isOnline,
                                       onChanged: (_) => _toggleStatus(index),
-                                      activeColor: Colors.green,
-                                      activeTrackColor:
-                                          Colors.green.withValues(alpha: 0.2),
+                                      activeThumbColor: Colors.green,
+                                      activeTrackColor: Colors.green.withValues(
+                                        alpha: 0.2,
+                                      ),
                                       inactiveThumbColor: Colors.white24,
                                       inactiveTrackColor: Colors.white10,
                                     ),
@@ -226,13 +268,15 @@ class _ProviderManagementScreenState extends State<ProviderManagementScreen> {
                                         icon: LucideIcons.pencil,
                                         onTap: () async {
                                           LogService.info(
-                                              'Opening edit screen for ${provider.name}');
+                                            'Opening edit screen for ${provider.name}',
+                                          );
                                           final updated = await Navigator.push(
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) =>
                                                   ProviderEditScreen(
-                                                      provider: provider),
+                                                    provider: provider,
+                                                  ),
                                             ),
                                           );
 
@@ -240,11 +284,13 @@ class _ProviderManagementScreenState extends State<ProviderManagementScreen> {
                                               updated is ServiceProvider) {
                                             _updateProvider(updated);
                                             if (context.mounted) {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
                                                 SnackBar(
                                                   content: Text(
-                                                      '${updated.name} updated successfully'),
+                                                    '${updated.name} updated successfully',
+                                                  ),
                                                   backgroundColor: Colors.green,
                                                 ),
                                               );
@@ -260,13 +306,15 @@ class _ProviderManagementScreenState extends State<ProviderManagementScreen> {
                                         icon: LucideIcons.lineChart,
                                         onTap: () {
                                           LogService.info(
-                                              'Opening history screen for ${provider.name}');
+                                            'Opening history screen for ${provider.name}',
+                                          );
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) =>
                                                   ProviderServiceHistoryScreen(
-                                                      provider: provider),
+                                                    provider: provider,
+                                                  ),
                                             ),
                                           );
                                         },
@@ -407,10 +455,7 @@ class _GlassBox extends StatelessWidget {
           ],
         ),
       ),
-      child: Padding(
-        padding: padding,
-        child: child,
-      ),
+      child: Padding(padding: padding, child: child),
     );
   }
 }

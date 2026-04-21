@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/services/log_service.dart';
 import '../../services/models/lounge.dart';
+import 'lounge_add_screen.dart';
 import 'lounge_edit_screen.dart';
 import 'lounge_amenities_screen.dart';
 
@@ -90,6 +91,29 @@ class _LoungeManagementScreenState extends State<LoungeManagementScreen> {
     });
   }
 
+  Future<void> _openAddLounge() async {
+    LogService.info('Opening Add Lounge screen');
+    final newLounge = await Navigator.push<Lounge>(
+      context,
+      MaterialPageRoute(builder: (context) => const LoungeAddScreen()),
+    );
+
+    if (newLounge != null) {
+      setState(() {
+        _allLounges.insert(0, newLounge);
+        _filteredLounges.insert(0, newLounge);
+      });
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${newLounge.name} added successfully'),
+            backgroundColor: Colors.amber,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,6 +129,14 @@ class _LoungeManagementScreenState extends State<LoungeManagementScreen> {
             Navigator.pop(context);
           },
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Add New Lounge',
+            icon: const Icon(LucideIcons.plusCircle, color: Colors.amber),
+            onPressed: _openAddLounge,
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SafeArea(
         child: Column(

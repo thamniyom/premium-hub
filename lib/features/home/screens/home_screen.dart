@@ -227,6 +227,7 @@ class HomeScreen extends StatelessWidget {
                     'Featured Providers',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.bold,
+                      fontSize: 10,
                     ),
                   ),
                   const Icon(
@@ -283,7 +284,9 @@ class HomeScreen extends StatelessWidget {
                           const SizedBox(height: 12),
                           Text(
                             'Provider ${index + 1}',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyLarge?.copyWith(fontSize: 10),
                           ),
                           const SizedBox(height: 4),
                           Row(
@@ -317,6 +320,7 @@ class HomeScreen extends StatelessWidget {
                     'Popular Lounges',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.bold,
+                      fontSize: 10,
                     ),
                   ),
                   const Icon(
@@ -374,7 +378,9 @@ class HomeScreen extends StatelessWidget {
                           const SizedBox(height: 12),
                           Text(
                             'Lounge ${index + 1}',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyLarge?.copyWith(fontSize: 10),
                           ),
                           const SizedBox(height: 4),
                           Row(
@@ -404,19 +410,12 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-
-
 class _ServiceIcon extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback? onTap;
 
-  const _ServiceIcon({
-    super.key,
-    required this.icon,
-    required this.label,
-    this.onTap,
-  });
+  const _ServiceIcon({required this.icon, required this.label, this.onTap});
 
   @override
   Widget build(BuildContext context) {

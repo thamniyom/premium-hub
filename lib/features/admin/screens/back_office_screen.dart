@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/services/log_service.dart';
 import 'provider_table_screen.dart';
+import 'user_management_table_screen.dart';
+import 'transaction_registry_screen.dart';
 
 class BackOfficeScreen extends StatelessWidget {
   const BackOfficeScreen({super.key});
@@ -61,8 +63,13 @@ class BackOfficeScreen extends StatelessWidget {
                 subtitle: 'Review customer and provider accounts',
                 icon: LucideIcons.users,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Module coming soon...')),
+                  LogService.screenOpened('UserManagementTableScreen');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const UserManagementTableScreen(),
+                    ),
                   );
                 },
               ),
@@ -73,8 +80,13 @@ class BackOfficeScreen extends StatelessWidget {
                 subtitle: 'Verify system-wide financial movements',
                 icon: LucideIcons.fileSpreadsheet,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Module coming soon...')),
+                  LogService.screenOpened('TransactionRegistryScreen');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const TransactionRegistryScreen(),
+                    ),
                   );
                 },
               ),

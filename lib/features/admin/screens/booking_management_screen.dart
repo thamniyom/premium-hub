@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import '../../bookings/models/booking.dart';
+import 'booking_add_screen.dart';
 
 class BookingManagementScreen extends StatefulWidget {
   const BookingManagementScreen({super.key});
@@ -79,6 +80,28 @@ class _BookingManagementScreenState extends State<BookingManagementScreen>
     });
   }
 
+  Future<void> _openAddBooking() async {
+    final newBooking = await Navigator.push<Booking>(
+      context,
+      MaterialPageRoute(builder: (context) => const BookingAddScreen()),
+    );
+
+    if (newBooking != null) {
+      setState(() {
+        _allBookings.insert(0, newBooking);
+      });
+      _applyFilters(_searchController.text);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Booking for ${newBooking.providerName} added'),
+            backgroundColor: Colors.amber,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,6 +114,14 @@ class _BookingManagementScreenState extends State<BookingManagementScreen>
           icon: const Icon(LucideIcons.arrowLeft, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Add New Booking',
+            icon: const Icon(LucideIcons.plusCircle, color: Colors.amber),
+            onPressed: _openAddBooking,
+          ),
+          const SizedBox(width: 8),
+        ],
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.amber,
