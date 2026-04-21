@@ -1,4 +1,1 @@
-scripts:	
-  - name: Build for Simulator	
-    script: |	
-      flutter build ios --simulator --debug	
+
