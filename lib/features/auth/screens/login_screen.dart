@@ -25,12 +25,12 @@ class LoginScreen extends StatelessWidget {
                     size: 60,
                     color: Colors.amber,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   Text(
                     'Premium Hub',
                     style: Theme.of(context).textTheme.displayMedium,
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 15),
                   TextField(
                     decoration: InputDecoration(
                       hintText: 'Email',
@@ -44,7 +44,7 @@ class LoginScreen extends StatelessWidget {
                     ),
                     style: const TextStyle(color: Colors.white),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   TextField(
                     obscureText: true,
                     decoration: InputDecoration(
@@ -59,7 +59,7 @@ class LoginScreen extends StatelessWidget {
                     ),
                     style: const TextStyle(color: Colors.white),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 15),
                   SizedBox(
                     width: double.infinity,
                     height: 50,

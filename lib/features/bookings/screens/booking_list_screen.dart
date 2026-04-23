@@ -44,9 +44,9 @@ class _BookingListScreenState extends State<BookingListScreen>
                   Text(
                     'My Bookings',
                     style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ],
               ),
@@ -179,25 +179,37 @@ class _BookingListView extends StatelessWidget {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         Row(
                           children: [
-                            const Icon(LucideIcons.calendar,
-                                color: Colors.white54, size: 14),
+                            const Icon(
+                              LucideIcons.calendar,
+                              color: Colors.white54,
+                              size: 14,
+                            ),
                             const SizedBox(width: 6),
                             Text(
-                              DateFormat('MMM dd, yyyy').format(booking.dateTime),
+                              DateFormat(
+                                'MMM dd, yyyy',
+                              ).format(booking.dateTime),
                               style: const TextStyle(
-                                  color: Colors.white54, fontSize: 12),
+                                color: Colors.white54,
+                                fontSize: 12,
+                              ),
                             ),
-                            const SizedBox(width: 16),
-                            const Icon(LucideIcons.clock,
-                                color: Colors.white54, size: 14),
+                            const SizedBox(width: 10),
+                            const Icon(
+                              LucideIcons.clock,
+                              color: Colors.white54,
+                              size: 14,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               DateFormat('hh:mm a').format(booking.dateTime),
                               style: const TextStyle(
-                                  color: Colors.white54, fontSize: 12),
+                                color: Colors.white54,
+                                fontSize: 12,
+                              ),
                             ),
                           ],
                         ),

@@ -23,9 +23,9 @@ class ProfileScreen extends StatelessWidget {
                 Text(
                   'Profile',
                   style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(LucideIcons.settings, color: Colors.white70),
@@ -42,8 +42,10 @@ class ProfileScreen extends StatelessWidget {
                   Stack(
                     children: [
                       GestureDetector(
-                        onTap: () => Provider.of<AppState>(context, listen: false)
-                            .setNavigationIndex(4),
+                        onTap: () => Provider.of<AppState>(
+                          context,
+                          listen: false,
+                        ).setNavigationIndex(4),
                         child: const CircleAvatar(
                           radius: 60,
                           backgroundImage: NetworkImage(
@@ -81,10 +83,7 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 4),
                   const Text(
                     'jessica.t@example.com',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white70,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.white70),
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
@@ -128,7 +127,7 @@ class ProfileScreen extends StatelessWidget {
                     value: '12',
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 10),
                 Expanded(
                   child: _StatCard(
                     icon: LucideIcons.star,
@@ -136,7 +135,7 @@ class ProfileScreen extends StatelessWidget {
                     value: '4.9',
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 10),
                 Expanded(
                   child: _StatCard(
                     icon: LucideIcons.award,
@@ -233,15 +232,15 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GlassCard(
       height: 100,
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Column(
         children: [
           Icon(icon, color: Colors.amber, size: 24),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Text(
             value,
             style: const TextStyle(
-              fontSize: 18,
+              fontSize: 14,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
@@ -249,10 +248,7 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.white54,
-            ),
+            style: const TextStyle(fontSize: 12, color: Colors.white54),
           ),
         ],
       ),
@@ -302,17 +298,10 @@ class _MenuTile extends StatelessWidget {
               if (trailing != null)
                 Text(
                   trailing!,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.white54,
-                  ),
+                  style: const TextStyle(fontSize: 14, color: Colors.white54),
                 ),
               const SizedBox(width: 8),
-              Icon(
-                LucideIcons.chevronRight,
-                color: Colors.white24,
-                size: 20,
-              ),
+              Icon(LucideIcons.chevronRight, color: Colors.white24, size: 20),
             ],
           ),
         ),
