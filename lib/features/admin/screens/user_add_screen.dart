@@ -75,17 +75,20 @@ class _UserAddScreenState extends State<UserAddScreen> {
                       color: Colors.amber.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                       border: Border.all(
-                          color: Colors.amber.withValues(alpha: 0.3)),
+                        color: Colors.amber.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: CircleAvatar(
                       radius: 48,
-                      backgroundImage:
-                          NetworkImage(_avatarUrlController.text),
+                      backgroundImage: NetworkImage(_avatarUrlController.text),
                       backgroundColor: Colors.white10,
                       onBackgroundImageError: (_, __) {},
                       child: _avatarUrlController.text.isEmpty
-                          ? const Icon(LucideIcons.user,
-                              size: 48, color: Colors.amber)
+                          ? const Icon(
+                              LucideIcons.user,
+                              size: 48,
+                              color: Colors.amber,
+                            )
                           : null,
                     ),
                   ),
@@ -100,6 +103,7 @@ class _UserAddScreenState extends State<UserAddScreen> {
                   prefixIcon: LucideIcons.user,
                   validator: (v) =>
                       v == null || v.isEmpty ? 'Name is required' : null,
+                  maxLines: 5,
                 ),
                 const SizedBox(height: 20),
 
@@ -115,6 +119,7 @@ class _UserAddScreenState extends State<UserAddScreen> {
                     if (!v.contains('@')) return 'Enter a valid email';
                     return null;
                   },
+                  maxLines: 5,
                 ),
                 const SizedBox(height: 20),
 
@@ -127,6 +132,7 @@ class _UserAddScreenState extends State<UserAddScreen> {
                   onChanged: (v) => setState(() {}),
                   validator: (v) =>
                       v == null || v.isEmpty ? 'Avatar URL is required' : null,
+                  maxLines: 5,
                 ),
                 const SizedBox(height: 20),
 
@@ -184,10 +190,7 @@ class _RoleSelector extends StatelessWidget {
   final UserRole selected;
   final ValueChanged<UserRole> onChanged;
 
-  const _RoleSelector({
-    required this.selected,
-    required this.onChanged,
-  });
+  const _RoleSelector({required this.selected, required this.onChanged});
 
   Color _colorFor(UserRole r) {
     switch (r) {
@@ -240,9 +243,11 @@ class _RoleSelector extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    Icon(_iconFor(r),
-                        size: 18,
-                        color: isSelected ? color : Colors.white38),
+                    Icon(
+                      _iconFor(r),
+                      size: 18,
+                      color: isSelected ? color : Colors.white38,
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       r.name[0].toUpperCase() + r.name.substring(1),
@@ -271,10 +276,7 @@ class _StatusSelector extends StatelessWidget {
   final UserStatus selected;
   final ValueChanged<UserStatus> onChanged;
 
-  const _StatusSelector({
-    required this.selected,
-    required this.onChanged,
-  });
+  const _StatusSelector({required this.selected, required this.onChanged});
 
   Color _colorFor(UserStatus s) {
     switch (s) {
@@ -369,10 +371,10 @@ class _GlassInput extends StatelessWidget {
     required this.controller,
     required this.hint,
     this.prefixIcon,
-    this.maxLines = 1,
     this.keyboardType = TextInputType.text,
     this.validator,
     this.onChanged,
+    required this.maxLines,
   });
 
   @override
@@ -396,8 +398,10 @@ class _GlassInput extends StatelessWidget {
           prefixIcon: prefixIcon != null
               ? Icon(prefixIcon, color: Colors.amber, size: 18)
               : null,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ),
           border: InputBorder.none,
         ),
       ),

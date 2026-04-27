@@ -75,13 +75,15 @@ class _RevenueAnalyticsScreenState extends State<RevenueAnalyticsScreen> {
                       maxY: 1000,
                       barTouchData: BarTouchData(
                         touchTooltipData: BarTouchTooltipData(
-                          getTooltipColor: (_) => Colors.amber.withValues(alpha: 0.9),
-                          tooltipRoundedRadius: 8,
+                          getTooltipColor: (_) =>
+                              Colors.amber.withValues(alpha: 0.9),
                           getTooltipItem: (group, groupIndex, rod, rodIndex) {
                             return BarTooltipItem(
                               '\$${rod.toY.round()}',
                               const TextStyle(
-                                  color: Colors.black, fontWeight: FontWeight.bold),
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
                             );
                           },
                         ),
@@ -98,18 +100,23 @@ class _RevenueAnalyticsScreenState extends State<RevenueAnalyticsScreen> {
                                 child: Text(
                                   days[val.toInt() % 7],
                                   style: const TextStyle(
-                                      color: Colors.white54, fontSize: 12),
+                                    color: Colors.white54,
+                                    fontSize: 12,
+                                  ),
                                 ),
                               );
                             },
                           ),
                         ),
                         leftTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false)),
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
                         topTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false)),
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
                         rightTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false)),
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
                       ),
                       gridData: const FlGridData(show: false),
                       borderData: FlBorderData(show: false),
@@ -158,9 +165,10 @@ class _RevenueAnalyticsScreenState extends State<RevenueAnalyticsScreen> {
                                   title: '65%',
                                   radius: 50,
                                   titleStyle: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
                                 ),
                                 PieChartSectionData(
                                   color: Colors.blueAccent,
@@ -168,9 +176,10 @@ class _RevenueAnalyticsScreenState extends State<RevenueAnalyticsScreen> {
                                   title: '35%',
                                   radius: 50,
                                   titleStyle: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ],
                             ),
@@ -186,12 +195,16 @@ class _RevenueAnalyticsScreenState extends State<RevenueAnalyticsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _LegendItem(
-                            label: 'Lounge', color: Colors.amber, value: '65%'),
+                          label: 'Lounge',
+                          color: Colors.amber,
+                          value: '65%',
+                        ),
                         const SizedBox(height: 12),
                         _LegendItem(
-                            label: 'Services',
-                            color: Colors.blueAccent,
-                            value: '35%'),
+                          label: 'Services',
+                          color: Colors.blueAccent,
+                          value: '35%',
+                        ),
                       ],
                     ),
                   ),
@@ -333,10 +346,7 @@ class _LegendItem extends StatelessWidget {
             Container(
               width: 12,
               height: 12,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             ),
             const SizedBox(width: 8),
             Text(
@@ -457,10 +467,7 @@ class _GlassBox extends StatelessWidget {
           ],
         ),
       ),
-      child: Padding(
-        padding: padding,
-        child: child,
-      ),
+      child: Padding(padding: padding, child: child),
     );
   }
 }

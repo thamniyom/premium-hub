@@ -52,8 +52,11 @@ class _BookingAddScreenState extends State<BookingAddScreen> {
     if (date != null) {
       setState(() {
         _selectedDateTime = DateTime(
-          date.year, date.month, date.day,
-          _selectedDateTime.hour, _selectedDateTime.minute,
+          date.year,
+          date.month,
+          date.day,
+          _selectedDateTime.hour,
+          _selectedDateTime.minute,
         );
       });
     }
@@ -78,8 +81,11 @@ class _BookingAddScreenState extends State<BookingAddScreen> {
     if (time != null) {
       setState(() {
         _selectedDateTime = DateTime(
-          _selectedDateTime.year, _selectedDateTime.month, _selectedDateTime.day,
-          time.hour, time.minute,
+          _selectedDateTime.year,
+          _selectedDateTime.month,
+          _selectedDateTime.day,
+          time.hour,
+          time.minute,
         );
       });
     }
@@ -133,17 +139,20 @@ class _BookingAddScreenState extends State<BookingAddScreen> {
                       color: Colors.amber.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                       border: Border.all(
-                          color: Colors.amber.withValues(alpha: 0.3)),
+                        color: Colors.amber.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: CircleAvatar(
                       radius: 44,
-                      backgroundImage:
-                          NetworkImage(_imageUrlController.text),
+                      backgroundImage: NetworkImage(_imageUrlController.text),
                       onBackgroundImageError: (_, __) {},
                       backgroundColor: Colors.white10,
                       child: _imageUrlController.text.isEmpty
-                          ? const Icon(LucideIcons.user,
-                              size: 44, color: Colors.amber)
+                          ? const Icon(
+                              LucideIcons.user,
+                              size: 44,
+                              color: Colors.amber,
+                            )
                           : null,
                     ),
                   ),
@@ -154,8 +163,10 @@ class _BookingAddScreenState extends State<BookingAddScreen> {
                 _GlassInput(
                   controller: _providerNameController,
                   hint: 'e.g. Sarah Johnson',
-                  validator: (v) =>
-                      v == null || v.isEmpty ? 'Provider name is required' : null,
+                  validator: (v) => v == null || v.isEmpty
+                      ? 'Provider name is required'
+                      : null,
+                  maxLines: 5,
                 ),
                 const SizedBox(height: 20),
 
@@ -163,8 +174,10 @@ class _BookingAddScreenState extends State<BookingAddScreen> {
                 _GlassInput(
                   controller: _serviceTypeController,
                   hint: 'e.g. Aromatherapy Massage',
-                  validator: (v) =>
-                      v == null || v.isEmpty ? 'Service type is required' : null,
+                  validator: (v) => v == null || v.isEmpty
+                      ? 'Service type is required'
+                      : null,
+                  maxLines: 5,
                 ),
                 const SizedBox(height: 20),
 
@@ -175,6 +188,7 @@ class _BookingAddScreenState extends State<BookingAddScreen> {
                   keyboardType: TextInputType.number,
                   validator: (v) =>
                       double.tryParse(v ?? '') == null ? 'Invalid price' : null,
+                  maxLines: 5,
                 ),
                 const SizedBox(height: 20),
 
@@ -185,6 +199,7 @@ class _BookingAddScreenState extends State<BookingAddScreen> {
                   onChanged: (v) => setState(() {}),
                   validator: (v) =>
                       v == null || v.isEmpty ? 'Image URL is required' : null,
+                  maxLines: 5,
                 ),
                 const SizedBox(height: 20),
 
@@ -299,10 +314,7 @@ class _GlassStatusSelector extends StatelessWidget {
   final BookingStatus selected;
   final ValueChanged<BookingStatus> onChanged;
 
-  const _GlassStatusSelector({
-    required this.selected,
-    required this.onChanged,
-  });
+  const _GlassStatusSelector({required this.selected, required this.onChanged});
 
   Color _colorFor(BookingStatus s) {
     switch (s) {
@@ -395,10 +407,10 @@ class _GlassInput extends StatelessWidget {
   const _GlassInput({
     required this.controller,
     required this.hint,
-    this.maxLines = 1,
     this.keyboardType = TextInputType.text,
     this.validator,
     this.onChanged,
+    required this.maxLines,
   });
 
   @override
@@ -419,8 +431,10 @@ class _GlassInput extends StatelessWidget {
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: const TextStyle(color: Colors.white24, fontSize: 14),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ),
           border: InputBorder.none,
         ),
       ),

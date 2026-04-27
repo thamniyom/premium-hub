@@ -33,18 +33,22 @@ class HomeScreen extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Icon(
-                    Icons.workspace_premium,
-                    size: 40,
-                    color: Color(0xFFFFD700),
-                  ),
-                  Text(
-                    'PREMIUMHUB\nSERVICE ON DEMAND',
-                    textAlign: TextAlign.left,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.workspace_premium,
+                        size: 40,
+                        color: Color(0xFFFFD700),
+                      ),
+                      Text(
+                        'PREMIUMHUB\nSERVICE ON DEMAND',
+                        textAlign: TextAlign.left,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                   GestureDetector(
                     onTap: () => Provider.of<AppState>(

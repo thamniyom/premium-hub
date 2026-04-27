@@ -1,8 +1,11 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:premium_hub/main.dart';
 import 'package:provider/provider.dart';
 import '../../../core/widgets/glass_card.dart';
+import '../../../core/services/notification_service.dart';
 import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -172,6 +175,15 @@ class ProfileScreen extends StatelessWidget {
               icon: LucideIcons.bell,
               label: 'Notifications',
               onTap: () {},
+            ),
+            _MenuTile(
+              icon: LucideIcons.send,
+              label: 'Test Send Notification',
+              onTap: () async {
+                if (Platform.isAndroid || Platform.isIOS) {
+                  await NotificationService().showTestNotification();
+                }
+              },
             ),
             _MenuTile(
               icon: LucideIcons.languages,
