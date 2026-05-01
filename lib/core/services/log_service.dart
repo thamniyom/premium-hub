@@ -5,8 +5,15 @@ import 'package:flutter/foundation.dart';
 class LogService {
   LogService._(); // private constructor — not instantiable
 
-  static void _log(String category, String message, [Map<String, dynamic>? data]) {
-    final time = DateTime.now().toIso8601String().substring(11, 23); // HH:mm:ss.mmm
+  static void _log(
+    String category,
+    String message, [
+    Map<String, dynamic>? data,
+  ]) {
+    final time = DateTime.now().toIso8601String().substring(
+      11,
+      23,
+    ); // HH:mm:ss.mmm
     final dataStr = data != null ? ' | data: $data' : '';
     debugPrint('[LOG][$time][$category] $message$dataStr');
   }
@@ -22,8 +29,11 @@ class LogService {
   static void loginPressed({String? email}) =>
       _log('AUTH', 'Sign-in button pressed', {'email': email ?? 'n/a'});
 
-  static void loginSuccess({String? email}) =>
-      _log('AUTH', 'Login successful – navigating to Home', {'email': email ?? 'n/a'});
+  static void loginSuccess({String? email}) => _log(
+    'AUTH',
+    'Login successful – navigating to Home',
+    {'email': email ?? 'n/a'},
+  );
 
   // ── Navigation ─────────────────────────────────────────────────
   static void tabChanged(int index) {
@@ -42,12 +52,18 @@ class LogService {
       _log('HOME', 'Service icon tapped: $label');
 
   // ── Providers ──────────────────────────────────────────────────
-  static void providerTapped(String providerId, String providerName) =>
-      _log('PROVIDER', 'Provider tapped', {'id': providerId, 'name': providerName});
+  static void providerTapped(String providerId, String providerName) => _log(
+    'PROVIDER',
+    'Provider tapped',
+    {'id': providerId, 'name': providerName},
+  );
 
   // ── Booking ────────────────────────────────────────────────────
-  static void bookingDateSelected(DateTime date) =>
-      _log('BOOKING', 'Date selected', {'date': date.toIso8601String().substring(0, 10)});
+  static void bookingDateSelected(DateTime date) => _log(
+    'BOOKING',
+    'Date selected',
+    {'date': date.toIso8601String().substring(0, 10)},
+  );
 
   static void bookingTimeSelected(String time) =>
       _log('BOOKING', 'Time selected', {'time': time});
@@ -62,15 +78,14 @@ class LogService {
     required String time,
     required int hours,
     required double total,
-  }) =>
-      _log('BOOKING', 'Booking confirmed', {
-        'provider_id': providerId,
-        'provider_name': providerName,
-        'date': date,
-        'time': time,
-        'hours': hours,
-        'total': total,
-      });
+  }) => _log('BOOKING', 'Booking confirmed', {
+    'provider_id': providerId,
+    'provider_name': providerName,
+    'date': date,
+    'time': time,
+    'hours': hours,
+    'total': total,
+  });
 
   // ── Top-up ─────────────────────────────────────────────────────
   static void topUpQuickAmountSelected(int amount) =>
@@ -89,4 +104,8 @@ class LogService {
 
   static void messageSent(String conversationId) =>
       _log('MSG', 'Message sent', {'conversation_id': conversationId});
+
+  static void error(String message) {
+    _log('ERROR', message);
+  }
 }

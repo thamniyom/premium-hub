@@ -5,6 +5,7 @@ import 'provider_management_screen.dart';
 import 'lounge_management_screen.dart';
 import 'booking_management_screen.dart';
 import 'revenue_analytics_screen.dart';
+import 'combo_box_management_screen.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
@@ -120,6 +121,23 @@ class AdminDashboardScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => const BookingManagementScreen(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+
+              // ComboBox Management
+              _ManagementItem(
+                title: 'ComboBox Management',
+                subtitle: 'Manage categories and configurations',
+                icon: LucideIcons.list,
+                onTap: () {
+                  LogService.screenOpened('ComboBoxManagementScreen');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ComboBoxManagementScreen(),
                     ),
                   );
                 },
