@@ -1,6 +1,6 @@
 import 'package:premium_hub/features/admin/models/combo_box.dart';
 
-class ServiceProvider {
+class Provider {
   final String id;
   final String? documentId;
   final String name;
@@ -12,7 +12,7 @@ class ServiceProvider {
   final double pricePerHour;
   final bool isOnline;
 
-  const ServiceProvider({
+  const Provider({
     required this.id,
     this.documentId,
     required this.name,
@@ -25,8 +25,8 @@ class ServiceProvider {
     this.isOnline = false,
   });
 
-  factory ServiceProvider.fromJson(Map<String, dynamic> json) {
-    return ServiceProvider(
+  factory Provider.fromJson(Map<String, dynamic> json) {
+    return Provider(
       id: json['id']?.toString() ?? '',
       documentId: json['documentId'] as String?,
       name: json['name'] as String? ?? '',
@@ -57,48 +57,52 @@ class ServiceProvider {
 }
 
 // Demo data
-final List<ServiceProvider> demoProviders = [
-  const ServiceProvider(
+final List<Provider> demoProviders = [
+  const Provider(
     id: '1',
     name: 'Sarah Johnson',
     category: ComboBox(type: 'provider_category', name: 'Booking'),
     imageUrl: 'https://randomuser.me/api/portraits/women/44.jpg',
     rating: 4.9,
     reviewCount: 124,
-    description: 'Expert massage therapist with 10 years of experience in luxury spas. Specializes in aromatherapy and deep tissue massage.',
+    description:
+        'Expert massage therapist with 10 years of experience in luxury spas. Specializes in aromatherapy and deep tissue massage.',
     pricePerHour: 85.0,
     isOnline: true,
   ),
-  const ServiceProvider(
+  const Provider(
     id: '2',
     name: 'Michael Chen',
     category: ComboBox(type: 'provider_category', name: 'Booking'),
     imageUrl: 'https://randomuser.me/api/portraits/men/20.jpg',
     rating: 4.8,
     reviewCount: 89,
-    description: 'Professional private chef offering bespoke dining experiences. Mediterranean and Asian fusion specialist.',
+    description:
+        'Professional private chef offering bespoke dining experiences. Mediterranean and Asian fusion specialist.',
     pricePerHour: 120.0,
     isOnline: true,
   ),
-  const ServiceProvider(
+  const Provider(
     id: '3',
     name: 'Elena Rodriguez',
     category: ComboBox(type: 'provider_category', name: 'Booking'),
     imageUrl: 'https://randomuser.me/api/portraits/women/65.jpg',
     rating: 4.7,
     reviewCount: 56,
-    description: 'Luxury concierge and personal shopper. Helping you find the best boutiques and events in the city.',
+    description:
+        'Luxury concierge and personal shopper. Helping you find the best boutiques and events in the city.',
     pricePerHour: 65.0,
     isOnline: false,
   ),
-  const ServiceProvider(
+  const Provider(
     id: '4',
     name: 'David Wilson',
     category: ComboBox(type: 'provider_category', name: 'Payment'),
     imageUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
     rating: 4.9,
     reviewCount: 210,
-    description: 'Financial advisor for premium investments and wealth management.',
+    description:
+        'Financial advisor for premium investments and wealth management.',
     pricePerHour: 150.0,
     isOnline: true,
   ),

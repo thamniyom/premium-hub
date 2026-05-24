@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
+import 'package:premium_hub/core/services/log_service.dart';
 import '../../bookings/models/booking.dart';
 
 class BookingAddScreen extends StatefulWidget {
@@ -100,7 +101,7 @@ class _BookingAddScreenState extends State<BookingAddScreen> {
         dateTime: _selectedDateTime,
         price: double.parse(_priceController.text.trim()),
         imageUrl: _imageUrlController.text.trim(),
-        status: _selectedStatus,
+        statusBooking: _selectedStatus,
       );
 
       Navigator.pop(context, newBooking);
@@ -111,7 +112,7 @@ class _BookingAddScreenState extends State<BookingAddScreen> {
   Widget build(BuildContext context) {
     final dateStr = DateFormat('EEE, MMM dd, yyyy').format(_selectedDateTime);
     final timeStr = DateFormat('hh:mm a').format(_selectedDateTime);
-
+    LogService.screenLoad('BookingAddScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -316,14 +317,18 @@ class _GlassStatusSelector extends StatelessWidget {
 
   const _GlassStatusSelector({required this.selected, required this.onChanged});
 
-  Color _colorFor(BookingStatus s) {
-    switch (s) {
+  Color _colorFor(BookingStatus statusBooking) {
+    switch (statusBooking) {
       case BookingStatus.upcoming:
         return Colors.orange;
       case BookingStatus.completed:
         return Colors.green;
       case BookingStatus.cancelled:
         return Colors.red;
+      case BookingStatus.pending:
+        return Colors.yellow;
+      case BookingStatus.confirmed:
+        return Colors.blue;
     }
   }
 

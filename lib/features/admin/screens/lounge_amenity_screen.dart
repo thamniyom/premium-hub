@@ -1,40 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/services/log_service.dart';
+import '../../admin/models/combo_box.dart';
 import '../../services/models/lounge.dart';
+import '../services/combo_box_service.dart';
 
-class LoungeAmenitiesScreen extends StatefulWidget {
+class LoungeAmenityScreen extends StatefulWidget {
   final Lounge lounge;
 
-  const LoungeAmenitiesScreen({super.key, required this.lounge});
+  const LoungeAmenityScreen({super.key, required this.lounge});
 
   @override
-  State<LoungeAmenitiesScreen> createState() => _LoungeAmenitiesScreenState();
+  State<LoungeAmenityScreen> createState() => _LoungeAmenityScreenState();
 }
 
-class _LoungeAmenitiesScreenState extends State<LoungeAmenitiesScreen> {
-  late List<String> _selectedAmenities;
+class _LoungeAmenityScreenState extends State<LoungeAmenityScreen> {
+  late List<ComboBox> _selectedAmenities;
   final TextEditingController _customController = TextEditingController();
-
-  final List<String> _commonAmenities = [
-    'Free Wi-Fi',
-    'Premium Bar',
-    'Live Music',
-    'Private Booths',
-    'Concierge',
-    'Dining Menu',
-    'Cocktails',
-    'Skyline View',
-    'Garden Setting',
-    'Organic Drinks',
-    'Shower',
-    'Spa Services',
-  ];
+  final ComboBoxService _comboBoxService = ComboBoxService();
+  List<ComboBox> _commonAmenities = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _selectedAmenities = List.from(widget.lounge.amenities);
+    _loadAmenities();
+  }
+
+  Future<void> _loadAmenities() async {
+    try {
+      final amenities = await _comboBoxService.getLoungeAmenity();
+      setState(() {
+        _commonAmenities = amenities;
+        _isLoading = false;
+      });
+    } catch (e) {
+      LogService.error('Failed to load amenities: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -43,10 +49,13 @@ class _LoungeAmenitiesScreenState extends State<LoungeAmenitiesScreen> {
     super.dispose();
   }
 
-  void _toggleAmenity(String amenity) {
+  void _toggleAmenity(ComboBox amenity) {
     setState(() {
-      if (_selectedAmenities.contains(amenity)) {
-        _selectedAmenities.remove(amenity);
+      final existingIndex = _selectedAmenities.indexWhere(
+        (a) => a.name == amenity.name,
+      );
+      if (existingIndex != -1) {
+        _selectedAmenities.removeAt(existingIndex);
       } else {
         _selectedAmenities.add(amenity);
       }
@@ -55,9 +64,9 @@ class _LoungeAmenitiesScreenState extends State<LoungeAmenitiesScreen> {
 
   void _addCustomAmenity() {
     final text = _customController.text.trim();
-    if (text.isNotEmpty && !_selectedAmenities.contains(text)) {
+    if (text.isNotEmpty && !_selectedAmenities.any((a) => a.name == text)) {
       setState(() {
-        _selectedAmenities.add(text);
+        _selectedAmenities.add(ComboBox(type: 'amenity', name: text));
         _customController.clear();
       });
     }
@@ -72,7 +81,7 @@ class _LoungeAmenitiesScreenState extends State<LoungeAmenitiesScreen> {
       rating: widget.lounge.rating,
       reviewCount: widget.lounge.reviewCount,
       description: widget.lounge.description,
-      pricePerEntry: widget.lounge.pricePerEntry,
+      pricePerHour: widget.lounge.pricePerHour,
       isOpen: widget.lounge.isOpen,
       amenities: _selectedAmenities,
     );
@@ -83,6 +92,7 @@ class _LoungeAmenitiesScreenState extends State<LoungeAmenitiesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('LoungeAmenityScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -126,33 +136,40 @@ class _LoungeAmenitiesScreenState extends State<LoungeAmenitiesScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: _commonAmenities.map((amenity) {
-                  final isSelected = _selectedAmenities.contains(amenity);
-                  return FilterChip(
-                    label: Text(amenity),
-                    selected: isSelected,
-                    onSelected: (_) => _toggleAmenity(amenity),
-                    backgroundColor: Colors.white.withValues(alpha: 0.05),
-                    selectedColor: Colors.amber.withValues(alpha: 0.2),
-                    checkmarkColor: Colors.amber,
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.amber : Colors.white70,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(
-                        color: isSelected
-                            ? Colors.amber.withValues(alpha: 0.5)
-                            : Colors.white.withValues(alpha: 0.1),
+              if (_isLoading)
+                const CircularProgressIndicator(color: Colors.amber)
+              else
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: _commonAmenities.map((amenity) {
+                    final isSelected = _selectedAmenities.any(
+                      (a) => a.name == amenity.name,
+                    );
+                    return FilterChip(
+                      label: Text(amenity.name),
+                      selected: isSelected,
+                      onSelected: (_) => _toggleAmenity(amenity),
+                      backgroundColor: Colors.white.withValues(alpha: 0.05),
+                      selectedColor: Colors.amber.withValues(alpha: 0.2),
+                      checkmarkColor: Colors.amber,
+                      labelStyle: TextStyle(
+                        color: isSelected ? Colors.amber : Colors.white70,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                       ),
-                    ),
-                  );
-                }).toList(),
-              ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(
+                          color: isSelected
+                              ? Colors.amber.withValues(alpha: 0.5)
+                              : Colors.white.withValues(alpha: 0.1),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
               const SizedBox(height: 32),
 
               // Custom Amenities
@@ -166,28 +183,38 @@ class _LoungeAmenitiesScreenState extends State<LoungeAmenitiesScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              if (_selectedAmenities.any((a) => !_commonAmenities.contains(a)))
+              if (_selectedAmenities.any(
+                (a) => !_commonAmenities.any((c) => c.name == a.name),
+              ))
                 Wrap(
                   spacing: 10,
                   runSpacing: 10,
                   children: _selectedAmenities
-                      .where((a) => !_commonAmenities.contains(a))
+                      .where(
+                        (a) => !_commonAmenities.any((c) => c.name == a.name),
+                      )
                       .map((amenity) {
-                    return Chip(
-                      label: Text(amenity),
-                      backgroundColor: Colors.blueAccent.withValues(alpha: 0.1),
-                      labelStyle: const TextStyle(color: Colors.blueAccent),
-                      deleteIcon:
-                          const Icon(LucideIcons.x, size: 14, color: Colors.blueAccent),
-                      onDeleted: () => _toggleAmenity(amenity),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(
-                          color: Colors.blueAccent.withValues(alpha: 0.3),
-                        ),
-                      ),
-                    );
-                  }).toList(),
+                        return Chip(
+                          label: Text(amenity.name),
+                          backgroundColor: Colors.blueAccent.withValues(
+                            alpha: 0.1,
+                          ),
+                          labelStyle: const TextStyle(color: Colors.blueAccent),
+                          deleteIcon: const Icon(
+                            LucideIcons.x,
+                            size: 14,
+                            color: Colors.blueAccent,
+                          ),
+                          onDeleted: () => _toggleAmenity(amenity),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
+                              color: Colors.blueAccent.withValues(alpha: 0.3),
+                            ),
+                          ),
+                        );
+                      })
+                      .toList(),
                 ),
               const SizedBox(height: 16),
               _GlassInput(
@@ -217,10 +244,7 @@ class _LoungeAmenitiesScreenState extends State<LoungeAmenitiesScreen> {
                   ),
                   child: const Text(
                     'Save Changes',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -251,9 +275,7 @@ class _GlassInput extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: TextField(
         controller: controller,
@@ -262,8 +284,10 @@ class _GlassInput extends StatelessWidget {
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: const TextStyle(color: Colors.white24, fontSize: 14),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ),
           border: InputBorder.none,
           suffixIcon: suffixIcon,
         ),

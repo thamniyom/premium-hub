@@ -52,8 +52,14 @@ class _ComboBoxManagementScreenState extends State<ComboBoxManagementScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.grey[900],
-        title: const Text('Delete ComboBox', style: TextStyle(color: Colors.white)),
-        content: Text('Are you sure you want to delete ${box.name}?', style: const TextStyle(color: Colors.white70)),
+        title: const Text(
+          'Delete ComboBox',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          'Are you sure you want to delete ${box.name}?',
+          style: const TextStyle(color: Colors.white70),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -73,9 +79,9 @@ class _ComboBoxManagementScreenState extends State<ComboBoxManagementScreen> {
         _loadData();
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to delete: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to delete: $e')));
         }
       }
     }
@@ -95,6 +101,7 @@ class _ComboBoxManagementScreenState extends State<ComboBoxManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('ComboBoxManagementScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -119,66 +126,92 @@ class _ComboBoxManagementScreenState extends State<ComboBoxManagementScreen> {
       ),
       body: SafeArea(
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator(color: Colors.amber))
+            ? const Center(
+                child: CircularProgressIndicator(color: Colors.amber),
+              )
             : _comboBoxes.isEmpty
-                ? const Center(
-                    child: Text('No combo boxes found', style: TextStyle(color: Colors.white54)),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                    itemCount: _comboBoxes.length,
-                    itemBuilder: (context, index) {
-                      final box = _comboBoxes[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: _GlassBox(
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      box.name,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Type: ${box.type}',
-                                      style: const TextStyle(color: Colors.white54, fontSize: 13),
-                                    ),
-                                    if (box.valueStr != null && box.valueStr!.isNotEmpty)
-                                      Text(
-                                        'Value (Str): ${box.valueStr}',
-                                        style: const TextStyle(color: Colors.white38, fontSize: 12),
-                                      ),
-                                    if (box.valueInt != null)
-                                      Text(
-                                        'Value (Int): ${box.valueInt}',
-                                        style: const TextStyle(color: Colors.white38, fontSize: 12),
-                                      ),
-                                  ],
+            ? const Center(
+                child: Text(
+                  'No combo boxes found',
+                  style: TextStyle(color: Colors.white54),
+                ),
+              )
+            : ListView.builder(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                itemCount: _comboBoxes.length,
+                itemBuilder: (context, index) {
+                  final box = _comboBoxes[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: _GlassBox(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  box.name,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
                                 ),
-                              ),
-                              IconButton(
-                                icon: const Icon(LucideIcons.pencil, color: Colors.amber, size: 20),
-                                onPressed: () => _openEditScreen(box),
-                                tooltip: 'Edit Details',
-                              ),
-                              IconButton(
-                                icon: const Icon(LucideIcons.trash2, color: Colors.redAccent, size: 20),
-                                onPressed: () => _deleteComboBox(box),
-                              ),
-                            ],
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Type: ${box.type}',
+                                  style: const TextStyle(
+                                    color: Colors.white54,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                if (box.valueStr != null &&
+                                    box.valueStr!.isNotEmpty)
+                                  Text(
+                                    'Value (Str): ${box.valueStr}',
+                                    style: const TextStyle(
+                                      color: Colors.white38,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                if (box.valueInt != null)
+                                  Text(
+                                    'Value (Int): ${box.valueInt}',
+                                    style: const TextStyle(
+                                      color: Colors.white38,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
+                          IconButton(
+                            icon: const Icon(
+                              LucideIcons.pencil,
+                              color: Colors.amber,
+                              size: 20,
+                            ),
+                            onPressed: () => _openEditScreen(box),
+                            tooltip: 'Edit Details',
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              LucideIcons.trash2,
+                              color: Colors.redAccent,
+                              size: 20,
+                            ),
+                            onPressed: () => _deleteComboBox(box),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:premium_hub/core/services/log_service.dart';
 import '../../../core/widgets/glass_card.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -14,7 +15,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _emailController = TextEditingController(text: 'jessica.t@example.com');
   final _phoneController = TextEditingController(text: '+1 (555) 000-1234');
   final _bioController = TextEditingController(
-      text: 'Passionate about digital services and luxury experiences.');
+    text: 'Passionate about digital services and luxury experiences.',
+  );
 
   @override
   void dispose() {
@@ -27,6 +29,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('EditProfileScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -135,10 +138,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
                 child: const Text(
                   'Update Profile',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ),

@@ -29,8 +29,12 @@ class _ComboBoxEditScreenState extends State<ComboBoxEditScreen> {
     super.initState();
     _typeController = TextEditingController(text: widget.comboBox?.type ?? '');
     _nameController = TextEditingController(text: widget.comboBox?.name ?? '');
-    _valueStrController = TextEditingController(text: widget.comboBox?.valueStr ?? '');
-    _valueIntController = TextEditingController(text: widget.comboBox?.valueInt?.toString() ?? '');
+    _valueStrController = TextEditingController(
+      text: widget.comboBox?.valueStr ?? '',
+    );
+    _valueIntController = TextEditingController(
+      text: widget.comboBox?.valueInt?.toString() ?? '',
+    );
   }
 
   @override
@@ -52,11 +56,18 @@ class _ComboBoxEditScreenState extends State<ComboBoxEditScreen> {
     final box = ComboBox(
       type: _typeController.text,
       name: _nameController.text,
-      valueStr: _valueStrController.text.isEmpty ? null : _valueStrController.text,
-      valueInt: _valueIntController.text.isEmpty ? null : int.tryParse(_valueIntController.text),
+      valueStr: _valueStrController.text.isEmpty
+          ? null
+          : _valueStrController.text,
+      valueInt: _valueIntController.text.isEmpty
+          ? null
+          : int.tryParse(_valueIntController.text),
     );
 
     try {
+      LogService.info(
+        '_ComboBoxEditScreenState documentId: ${widget.comboBox?.documentId}',
+      );
       if (widget.comboBox?.documentId != null) {
         // Update
         await _service.updateComboBox(widget.comboBox!.documentId!, box);
@@ -64,16 +75,16 @@ class _ComboBoxEditScreenState extends State<ComboBoxEditScreen> {
         // Create
         await _service.createComboBox(box);
       }
-      
+
       if (mounted) {
         Navigator.pop(context, true);
       }
     } catch (e) {
       LogService.error('Failed to save combo box: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to save: $e')));
       }
     } finally {
       if (mounted) {
@@ -87,7 +98,7 @@ class _ComboBoxEditScreenState extends State<ComboBoxEditScreen> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.comboBox != null;
-
+    LogService.screenLoad('ComboBoxEditScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -116,10 +127,16 @@ class _ComboBoxEditScreenState extends State<ComboBoxEditScreen> {
                         decoration: const InputDecoration(
                           labelText: 'Type',
                           labelStyle: TextStyle(color: Colors.white54),
-                          enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-                          focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.amber)),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white24),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.amber),
+                          ),
                         ),
-                        validator: (value) => value == null || value.isEmpty ? 'Type is required' : null,
+                        validator: (value) => value == null || value.isEmpty
+                            ? 'Type is required'
+                            : null,
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
@@ -128,10 +145,16 @@ class _ComboBoxEditScreenState extends State<ComboBoxEditScreen> {
                         decoration: const InputDecoration(
                           labelText: 'Name',
                           labelStyle: TextStyle(color: Colors.white54),
-                          enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-                          focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.amber)),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white24),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.amber),
+                          ),
                         ),
-                        validator: (value) => value == null || value.isEmpty ? 'Name is required' : null,
+                        validator: (value) => value == null || value.isEmpty
+                            ? 'Name is required'
+                            : null,
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
@@ -140,8 +163,12 @@ class _ComboBoxEditScreenState extends State<ComboBoxEditScreen> {
                         decoration: const InputDecoration(
                           labelText: 'Value (String)',
                           labelStyle: TextStyle(color: Colors.white54),
-                          enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-                          focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.amber)),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white24),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.amber),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -152,11 +179,17 @@ class _ComboBoxEditScreenState extends State<ComboBoxEditScreen> {
                         decoration: const InputDecoration(
                           labelText: 'Value (Int)',
                           labelStyle: TextStyle(color: Colors.white54),
-                          enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-                          focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.amber)),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white24),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.amber),
+                          ),
                         ),
                         validator: (value) {
-                          if (value != null && value.isNotEmpty && int.tryParse(value) == null) {
+                          if (value != null &&
+                              value.isNotEmpty &&
+                              int.tryParse(value) == null) {
                             return 'Must be a valid integer';
                           }
                           return null;

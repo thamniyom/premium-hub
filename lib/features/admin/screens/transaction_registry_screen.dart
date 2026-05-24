@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
+import 'package:premium_hub/core/services/log_service.dart';
 import '../models/app_transaction.dart';
 
 class TransactionRegistryScreen extends StatefulWidget {
@@ -11,8 +12,7 @@ class TransactionRegistryScreen extends StatefulWidget {
       _TransactionRegistryScreenState();
 }
 
-class _TransactionRegistryScreenState
-    extends State<TransactionRegistryScreen> {
+class _TransactionRegistryScreenState extends State<TransactionRegistryScreen> {
   late List<AppTransaction> _fullData;
   late List<AppTransaction> _displayData;
   final TextEditingController _searchController = TextEditingController();
@@ -43,8 +43,8 @@ class _TransactionRegistryScreenState
       _displayData = _fullData.where((t) {
         final matchesQuery =
             t.id.toLowerCase().contains(query) ||
-                t.userName.toLowerCase().contains(query) ||
-                t.description.toLowerCase().contains(query);
+            t.userName.toLowerCase().contains(query) ||
+            t.description.toLowerCase().contains(query);
         final matchesType = _typeFilter == null || t.type == _typeFilter;
         final matchesStatus =
             _statusFilter == null || t.status == _statusFilter;
@@ -61,24 +61,30 @@ class _TransactionRegistryScreenState
       _sortAscending = ascending;
       switch (columnIndex) {
         case 0:
-          _displayData.sort((a, b) => ascending
-              ? a.id.compareTo(b.id)
-              : b.id.compareTo(a.id));
+          _displayData.sort(
+            (a, b) => ascending ? a.id.compareTo(b.id) : b.id.compareTo(a.id),
+          );
           break;
         case 1:
-          _displayData.sort((a, b) => ascending
-              ? a.userName.compareTo(b.userName)
-              : b.userName.compareTo(a.userName));
+          _displayData.sort(
+            (a, b) => ascending
+                ? a.userName.compareTo(b.userName)
+                : b.userName.compareTo(a.userName),
+          );
           break;
         case 3:
-          _displayData.sort((a, b) => ascending
-              ? a.amount.compareTo(b.amount)
-              : b.amount.compareTo(a.amount));
+          _displayData.sort(
+            (a, b) => ascending
+                ? a.amount.compareTo(b.amount)
+                : b.amount.compareTo(a.amount),
+          );
           break;
         case 5:
-          _displayData.sort((a, b) => ascending
-              ? a.createdAt.compareTo(b.createdAt)
-              : b.createdAt.compareTo(a.createdAt));
+          _displayData.sort(
+            (a, b) => ascending
+                ? a.createdAt.compareTo(b.createdAt)
+                : b.createdAt.compareTo(a.createdAt),
+          );
           break;
       }
     });
@@ -100,28 +106,31 @@ class _TransactionRegistryScreenState
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Filters',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Filters',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 20),
 
                   // Type filter
-                  const Text('Type',
-                      style: TextStyle(
-                          color: Colors.white54,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5)),
+                  const Text(
+                    'Type',
+                    style: TextStyle(
+                      color: Colors.white54,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: [
-                      null,
-                      ...TransactionType.values,
-                    ].map((t) {
+                    children: [null, ...TransactionType.values].map((t) {
                       final label = t == null
                           ? 'All'
                           : t.name[0].toUpperCase() + t.name.substring(1);
@@ -134,11 +143,9 @@ class _TransactionRegistryScreenState
                           setState(() => _typeFilter = t);
                           _applyFilters();
                         },
-                        selectedColor:
-                            Colors.amber.withValues(alpha: 0.2),
+                        selectedColor: Colors.amber.withValues(alpha: 0.2),
                         labelStyle: TextStyle(
-                          color:
-                              isSelected ? Colors.amber : Colors.white54,
+                          color: isSelected ? Colors.amber : Colors.white54,
                           fontSize: 12,
                         ),
                         backgroundColor: Colors.white10,
@@ -153,20 +160,20 @@ class _TransactionRegistryScreenState
                   const SizedBox(height: 20),
 
                   // Status filter
-                  const Text('Status',
-                      style: TextStyle(
-                          color: Colors.white54,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5)),
+                  const Text(
+                    'Status',
+                    style: TextStyle(
+                      color: Colors.white54,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: [
-                      null,
-                      ...TransactionStatus.values,
-                    ].map((s) {
+                    children: [null, ...TransactionStatus.values].map((s) {
                       final label = s == null
                           ? 'All'
                           : s.name[0].toUpperCase() + s.name.substring(1);
@@ -179,11 +186,9 @@ class _TransactionRegistryScreenState
                           setState(() => _statusFilter = s);
                           _applyFilters();
                         },
-                        selectedColor:
-                            Colors.amber.withValues(alpha: 0.2),
+                        selectedColor: Colors.amber.withValues(alpha: 0.2),
                         labelStyle: TextStyle(
-                          color:
-                              isSelected ? Colors.amber : Colors.white54,
+                          color: isSelected ? Colors.amber : Colors.white54,
                           fontSize: 12,
                         ),
                         backgroundColor: Colors.white10,
@@ -216,10 +221,13 @@ class _TransactionRegistryScreenState
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.white24),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      child: const Text('Clear All Filters',
-                          style: TextStyle(color: Colors.white54)),
+                      child: const Text(
+                        'Clear All Filters',
+                        style: TextStyle(color: Colors.white54),
+                      ),
                     ),
                   ),
                 ],
@@ -287,10 +295,11 @@ class _TransactionRegistryScreenState
       child: Text(
         label.toUpperCase(),
         style: TextStyle(
-            color: color,
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5),
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
+        ),
       ),
     );
   }
@@ -298,11 +307,13 @@ class _TransactionRegistryScreenState
   // ── Totals ────────────────────────────────────────────────────────────────
 
   double get _totalRevenue => _displayData
-      .where((t) =>
-          t.status == TransactionStatus.completed &&
-          (t.type == TransactionType.booking ||
-              t.type == TransactionType.topUp ||
-              t.type == TransactionType.fee))
+      .where(
+        (t) =>
+            t.status == TransactionStatus.completed &&
+            (t.type == TransactionType.booking ||
+                t.type == TransactionType.topUp ||
+                t.type == TransactionType.fee),
+      )
       .fold(0, (sum, t) => sum + t.amount);
 
   double get _totalRefunds => _displayData
@@ -311,9 +322,12 @@ class _TransactionRegistryScreenState
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('TransactionRegistryScreen');
     final dateFormat = DateFormat('MMM dd, HH:mm');
-    final currencyFormat =
-        NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyFormat = NumberFormat.currency(
+      symbol: '\$',
+      decimalDigits: 2,
+    );
     final hasFilters = _typeFilter != null || _statusFilter != null;
 
     return Scaffold(
@@ -342,7 +356,9 @@ class _TransactionRegistryScreenState
                     width: 8,
                     height: 8,
                     decoration: const BoxDecoration(
-                        color: Colors.amber, shape: BoxShape.circle),
+                      color: Colors.amber,
+                      shape: BoxShape.circle,
+                    ),
                   ),
                 ),
             ],
@@ -382,8 +398,7 @@ class _TransactionRegistryScreenState
                     _SummaryChip(
                       label: 'Failed',
                       value: _displayData
-                          .where((t) =>
-                              t.status == TransactionStatus.failed)
+                          .where((t) => t.status == TransactionStatus.failed)
                           .length
                           .toString(),
                       color: Colors.red,
@@ -397,11 +412,16 @@ class _TransactionRegistryScreenState
               _GlassBox(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 4),
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
                   child: Row(
                     children: [
-                      const Icon(LucideIcons.search,
-                          color: Colors.amber, size: 20),
+                      const Icon(
+                        LucideIcons.search,
+                        color: Colors.amber,
+                        size: 20,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: TextField(
@@ -409,8 +429,7 @@ class _TransactionRegistryScreenState
                           onChanged: _onSearchChanged,
                           style: const TextStyle(color: Colors.white),
                           decoration: const InputDecoration(
-                            hintText:
-                                'Search ID, user or description...',
+                            hintText: 'Search ID, user or description...',
                             hintStyle: TextStyle(color: Colors.white24),
                             border: InputBorder.none,
                           ),
@@ -429,14 +448,16 @@ class _TransactionRegistryScreenState
                         padding: const EdgeInsets.only(top: 48),
                         child: Column(
                           children: [
-                            Icon(LucideIcons.fileX,
-                                size: 48,
-                                color: Colors.white
-                                    .withValues(alpha: 0.1)),
+                            Icon(
+                              LucideIcons.fileX,
+                              size: 48,
+                              color: Colors.white.withValues(alpha: 0.1),
+                            ),
                             const SizedBox(height: 16),
-                            const Text('No transactions found',
-                                style:
-                                    TextStyle(color: Colors.white24)),
+                            const Text(
+                              'No transactions found',
+                              style: TextStyle(color: Colors.white24),
+                            ),
                           ],
                         ),
                       ),
@@ -453,83 +474,113 @@ class _TransactionRegistryScreenState
                             fontSize: 12,
                           ),
                           dataTextStyle: const TextStyle(
-                              color: Colors.white70, fontSize: 13),
+                            color: Colors.white70,
+                            fontSize: 13,
+                          ),
                           dividerThickness: 0.3,
                           columns: [
                             DataColumn(
-                                label: const Text('TXN ID'),
-                                onSort: _onSort),
+                              label: const Text('TXN ID'),
+                              onSort: _onSort,
+                            ),
                             DataColumn(
-                                label: const Text('USER'),
-                                onSort: _onSort),
-                            const DataColumn(
-                                label: Text('DESCRIPTION')),
+                              label: const Text('USER'),
+                              onSort: _onSort,
+                            ),
+                            const DataColumn(label: Text('DESCRIPTION')),
                             DataColumn(
-                                label: const Text('AMOUNT'),
-                                numeric: true,
-                                onSort: _onSort),
+                              label: const Text('AMOUNT'),
+                              numeric: true,
+                              onSort: _onSort,
+                            ),
                             const DataColumn(label: Text('TYPE')),
                             const DataColumn(label: Text('STATUS')),
                             DataColumn(
-                                label: const Text('DATE'),
-                                onSort: _onSort),
+                              label: const Text('DATE'),
+                              onSort: _onSort,
+                            ),
                           ],
                           rows: _displayData.map((txn) {
                             final typeColor = _typeColor(txn.type);
                             final isCredit =
                                 txn.type == TransactionType.topUp ||
-                                    txn.type == TransactionType.booking;
-                            return DataRow(cells: [
-                              // ID
-                              DataCell(Text(txn.id,
-                                  style: const TextStyle(
+                                txn.type == TransactionType.booking;
+                            return DataRow(
+                              cells: [
+                                // ID
+                                DataCell(
+                                  Text(
+                                    txn.id,
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 12,
-                                      fontFamily: 'monospace'))),
-                              // User
-                              DataCell(Text(txn.userName,
-                                  style: const TextStyle(
-                                      color: Colors.white))),
-                              // Description
-                              DataCell(SizedBox(
-                                width: 200,
-                                child: Text(
-                                  txn.description,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                  style: const TextStyle(fontSize: 12),
+                                      fontFamily: 'monospace',
+                                    ),
+                                  ),
                                 ),
-                              )),
-                              // Amount
-                              DataCell(Text(
-                                '${isCredit ? '+' : '-'}${currencyFormat.format(txn.amount)}',
-                                style: TextStyle(
-                                  color: isCredit
-                                      ? Colors.green
-                                      : Colors.redAccent,
-                                  fontWeight: FontWeight.bold,
+                                // User
+                                DataCell(
+                                  Text(
+                                    txn.userName,
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
                                 ),
-                              )),
-                              // Type
-                              DataCell(Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(_typeIcon(txn.type),
-                                      size: 13, color: typeColor),
-                                  const SizedBox(width: 6),
-                                  _badge(txn.type.name, typeColor),
-                                ],
-                              )),
-                              // Status
-                              DataCell(_badge(txn.status.name,
-                                  _statusColor(txn.status))),
-                              // Date
-                              DataCell(Text(
-                                  dateFormat.format(txn.createdAt),
-                                  style: const TextStyle(
-                                      fontSize: 12))),
-                            ]);
+                                // Description
+                                DataCell(
+                                  SizedBox(
+                                    width: 200,
+                                    child: Text(
+                                      txn.description,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  ),
+                                ),
+                                // Amount
+                                DataCell(
+                                  Text(
+                                    '${isCredit ? '+' : '-'}${currencyFormat.format(txn.amount)}',
+                                    style: TextStyle(
+                                      color: isCredit
+                                          ? Colors.green
+                                          : Colors.redAccent,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                // Type
+                                DataCell(
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        _typeIcon(txn.type),
+                                        size: 13,
+                                        color: typeColor,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      _badge(txn.type.name, typeColor),
+                                    ],
+                                  ),
+                                ),
+                                // Status
+                                DataCell(
+                                  _badge(
+                                    txn.status.name,
+                                    _statusColor(txn.status),
+                                  ),
+                                ),
+                                // Date
+                                DataCell(
+                                  Text(
+                                    dateFormat.format(txn.createdAt),
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ),
+                              ],
+                            );
                           }).toList(),
                         ),
                       ),
@@ -567,14 +618,18 @@ class _SummaryChip extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(value,
-              style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14)),
-          Text(label,
-              style: TextStyle(
-                  color: color.withValues(alpha: 0.6), fontSize: 11)),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+          Text(
+            label,
+            style: TextStyle(color: color.withValues(alpha: 0.6), fontSize: 11),
+          ),
         ],
       ),
     );

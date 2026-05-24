@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:premium_hub/features/admin/services/provider_service.dart';
+import 'package:premium_hub/features/services/models/provider.dart';
 import '../../../core/services/log_service.dart';
-import '../../services/models/service_provider.dart';
 import 'provider_edit_screen.dart';
-import 'provider_service_history_screen.dart';
+import 'provider_history_screen.dart';
 import 'provider_add_screen.dart';
 
 class ProviderManagementScreen extends StatefulWidget {
@@ -15,15 +16,37 @@ class ProviderManagementScreen extends StatefulWidget {
 }
 
 class _ProviderManagementScreenState extends State<ProviderManagementScreen> {
-  late List<ServiceProvider> _allProviders;
-  late List<ServiceProvider> _filteredProviders;
+  late List<Provider> _allProviders;
+  late List<Provider> _filteredProviders;
   final TextEditingController _searchController = TextEditingController();
+
+  final ProviderService _service = ProviderService();
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _allProviders = List.from(demoProviders);
-    _filteredProviders = List.from(demoProviders);
+    _loadProviders();
+  }
+
+  Future<void> _loadProviders() async {
+    setState(() => _isLoading = true);
+    try {
+      final providers = await _service.getProviders();
+      setState(() {
+        _allProviders = providers;
+        _filteredProviders = providers;
+        _isLoading = false;
+      });
+    } catch (e) {
+      LogService.error('Failed to load providers: $e');
+      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to load providers: $e')));
+      }
+    }
   }
 
   @override
@@ -38,44 +61,66 @@ class _ProviderManagementScreenState extends State<ProviderManagementScreen> {
           .where(
             (p) =>
                 p.name.toLowerCase().contains(query.toLowerCase()) ||
-                p.category.toLowerCase().contains(query.toLowerCase()),
+                p.category.name.toLowerCase().contains(query.toLowerCase()),
           )
           .toList();
     });
   }
 
-  void _toggleStatus(int index) {
+  Future<void> _toggleStatus(int index) async {
+    final p = _filteredProviders[index];
+    final updatedProvider = Provider(
+      id: p.id,
+      documentId: p.documentId,
+      name: p.name,
+      category: p.category,
+      imageUrl: p.imageUrl,
+      rating: p.rating,
+      reviewCount: p.reviewCount,
+      description: p.description,
+      pricePerHour: p.pricePerHour,
+      isOnline: !p.isOnline,
+    );
+
+    // Optimistic UI update
     setState(() {
-      final p = _filteredProviders[index];
-      final updatedProvider = ServiceProvider(
-        id: p.id,
-        name: p.name,
-        category: p.category,
-        imageUrl: p.imageUrl,
-        rating: p.rating,
-        reviewCount: p.reviewCount,
-        description: p.description,
-        pricePerHour: p.pricePerHour,
-        isOnline: !p.isOnline,
-      );
-
-      // Update filtered list
       _filteredProviders[index] = updatedProvider;
-
-      // Update master list
       final masterIndex = _allProviders.indexWhere((item) => item.id == p.id);
       if (masterIndex != -1) {
         _allProviders[masterIndex] = updatedProvider;
       }
     });
 
-    LogService.providerTapped(
-      _filteredProviders[index].id,
-      'Status changed: ${_filteredProviders[index].isOnline ? 'Online' : 'Offline'}',
-    );
+    try {
+      if (updatedProvider.documentId != null) {
+        await _service.updateProvider(
+          updatedProvider.documentId!,
+          updatedProvider,
+        );
+      }
+      LogService.providerTapped(
+        updatedProvider.id,
+        'Status changed: ${updatedProvider.isOnline ? 'Online' : 'Offline'}',
+      );
+    } catch (e) {
+      // Revert UI on failure
+      setState(() {
+        _filteredProviders[index] = p;
+        final masterIndex = _allProviders.indexWhere((item) => item.id == p.id);
+        if (masterIndex != -1) {
+          _allProviders[masterIndex] = p;
+        }
+      });
+      LogService.error('Failed to update provider status: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to update status: $e')));
+      }
+    }
   }
 
-  void _updateProvider(ServiceProvider updatedProvider) {
+  void _updateProvider(Provider updatedProvider) {
     setState(() {
       // Update master list
       final masterIndex = _allProviders.indexWhere(
@@ -97,7 +142,7 @@ class _ProviderManagementScreenState extends State<ProviderManagementScreen> {
 
   Future<void> _openAddProvider() async {
     LogService.info('Opening Add Provider screen');
-    final newProvider = await Navigator.push<ServiceProvider>(
+    final newProvider = await Navigator.push<Provider>(
       context,
       MaterialPageRoute(builder: (context) => const ProviderAddScreen()),
     );
@@ -170,7 +215,11 @@ class _ProviderManagementScreenState extends State<ProviderManagementScreen> {
 
             // Provider List
             Expanded(
-              child: _filteredProviders.isEmpty
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(color: Colors.amber),
+                    )
+                  : _filteredProviders.isEmpty
                   ? const Center(
                       child: Text(
                         'No providers found',
@@ -212,7 +261,7 @@ class _ProviderManagementScreenState extends State<ProviderManagementScreen> {
                                             ),
                                           ),
                                           Text(
-                                            provider.category,
+                                            provider.category.name,
                                             style: const TextStyle(
                                               color: Colors.white54,
                                               fontSize: 13,
@@ -281,7 +330,7 @@ class _ProviderManagementScreenState extends State<ProviderManagementScreen> {
                                           );
 
                                           if (updated != null &&
-                                              updated is ServiceProvider) {
+                                              updated is Provider) {
                                             _updateProvider(updated);
                                             if (context.mounted) {
                                               ScaffoldMessenger.of(
@@ -312,7 +361,7 @@ class _ProviderManagementScreenState extends State<ProviderManagementScreen> {
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) =>
-                                                  ProviderServiceHistoryScreen(
+                                                  ProviderHistoryScreen(
                                                     provider: provider,
                                                   ),
                                             ),

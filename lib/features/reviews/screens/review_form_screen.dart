@@ -54,6 +54,7 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('ReviewFormScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -176,10 +177,7 @@ class _ReviewFormScreenState extends State<ReviewFormScreen> {
                 ),
                 child: const Text(
                   'Submit Review',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -217,10 +215,7 @@ class _GlassBox extends StatelessWidget {
           ],
         ),
       ),
-      child: Padding(
-        padding: padding,
-        child: child,
-      ),
+      child: Padding(padding: padding, child: child),
     );
   }
 }

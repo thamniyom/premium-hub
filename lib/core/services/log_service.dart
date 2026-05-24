@@ -43,6 +43,8 @@ class LogService {
 
   static void screenOpened(String screenName, [Map<String, dynamic>? params]) =>
       _log('NAV', 'Opened screen: $screenName', params);
+  static void screenLoad(String screenName, [Map<String, dynamic>? params]) =>
+      _log('NAV', 'Load screen: $screenName', params);
 
   static void screenPopped(String screenName) =>
       _log('NAV', 'Popped screen: $screenName');
@@ -57,6 +59,8 @@ class LogService {
     'Provider tapped',
     {'id': providerId, 'name': providerName},
   );
+  static void loungeTapped(String providerId, String providerName) =>
+      _log('LOUNGE', 'Lounge tapped', {'id': providerId, 'name': providerName});
 
   // ── Booking ────────────────────────────────────────────────────
   static void bookingDateSelected(DateTime date) => _log(
@@ -108,4 +112,6 @@ class LogService {
   static void error(String message) {
     _log('ERROR', message);
   }
+
+  static void bookingDurationSelected(int d) {}
 }

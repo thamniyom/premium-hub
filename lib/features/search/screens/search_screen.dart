@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:premium_hub/core/services/log_service.dart';
 import 'package:premium_hub/core/widgets/glass_card.dart';
-import 'package:premium_hub/features/services/models/service_provider.dart';
-import 'package:premium_hub/features/services/screens/service_detail_screen.dart';
+import 'package:premium_hub/features/services/models/provider.dart';
+import 'package:premium_hub/features/services/screens/provider_detail_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -14,7 +15,7 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   String selectedCategory = 'All';
-  late List<ServiceProvider> filteredProviders;
+  late List<Provider> filteredProviders;
 
   final List<String> categories = [
     'All',
@@ -35,9 +36,10 @@ class _SearchScreenState extends State<SearchScreen> {
       filteredProviders = demoProviders.where((provider) {
         final matchesQuery =
             provider.name.toLowerCase().contains(query.toLowerCase()) ||
-            provider.category.toLowerCase().contains(query.toLowerCase());
+            provider.category.name.toLowerCase().contains(query.toLowerCase());
         final matchesCategory =
-            selectedCategory == 'All' || provider.category == selectedCategory;
+            selectedCategory == 'All' ||
+            provider.category.name == selectedCategory;
         return matchesQuery && matchesCategory;
       }).toList();
     });
@@ -45,6 +47,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('SearchScreen');
     return Container(
       color: Colors.black,
       child: SafeArea(
@@ -195,7 +198,7 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildProviderCard(ServiceProvider provider) {
+  Widget _buildProviderCard(Provider provider) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: GestureDetector(
@@ -203,7 +206,7 @@ class _SearchScreenState extends State<SearchScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ServiceDetailScreen(provider: provider),
+              builder: (context) => ProviderDetailScreen(provider: provider),
             ),
           );
         },
@@ -258,7 +261,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      provider.category,
+                      provider.category.name,
                       style: const TextStyle(color: Colors.amber, fontSize: 12),
                     ),
                     const SizedBox(height: 8),

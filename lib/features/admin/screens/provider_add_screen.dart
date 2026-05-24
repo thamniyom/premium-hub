@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:premium_hub/features/admin/services/provider_service.dart';
+import 'package:premium_hub/features/services/models/provider.dart';
 import '../../../core/services/log_service.dart';
-import '../../services/models/service_provider.dart';
+import '../models/combo_box.dart';
+import '../services/combo_box_service.dart';
 
 class ProviderAddScreen extends StatefulWidget {
   const ProviderAddScreen({super.key});
@@ -12,29 +15,72 @@ class ProviderAddScreen extends StatefulWidget {
 
 class _ProviderAddScreenState extends State<ProviderAddScreen> {
   final _formKey = GlobalKey<FormState>();
+  final ProviderService _service = ProviderService();
+  final ComboBoxService _comboBoxService = ComboBoxService();
+
+  List<ComboBox> _categories = [];
+  ComboBox? _selectedCategory;
+  bool _isLoadingCategories = true;
+  bool _isSaving = false;
+
   final _nameController = TextEditingController();
-  final _categoryController = TextEditingController();
   final _priceController = TextEditingController();
   final _imageUrlController = TextEditingController(
-      text: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=2574&auto=format&fit=crop');
+    text:
+        'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=2574&auto=format&fit=crop',
+  );
   final _descriptionController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final cats = await _comboBoxService.getLoungeCategories();
+      setState(() {
+        _categories = cats;
+        _isLoadingCategories = false;
+        if (_categories.isNotEmpty) {
+          _selectedCategory = _categories.first;
+        }
+      });
+    } catch (e) {
+      LogService.error('Failed to load categories: $e');
+      setState(() {
+        _isLoadingCategories = false;
+      });
+    }
+  }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _categoryController.dispose();
     _priceController.dispose();
     _imageUrlController.dispose();
     _descriptionController.dispose();
     super.dispose();
   }
 
-  void _saveProvider() {
+  Future<void> _saveProvider() async {
+    if (_selectedCategory == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select a category')));
+      return;
+    }
+
     if (_formKey.currentState!.validate()) {
-      final newProvider = ServiceProvider(
+      setState(() {
+        _isSaving = true;
+      });
+
+      final newProvider = Provider(
         id: 'p-${DateTime.now().millisecondsSinceEpoch}',
         name: _nameController.text,
-        category: _categoryController.text,
+        category: _selectedCategory!,
         imageUrl: _imageUrlController.text,
         rating: 5.0, // Default for new
         reviewCount: 0,
@@ -43,8 +89,26 @@ class _ProviderAddScreenState extends State<ProviderAddScreen> {
         isOnline: false,
       );
 
-      LogService.info('Creating new provider: ${newProvider.id}');
-      Navigator.pop(context, newProvider);
+      try {
+        LogService.info('Creating new provider: ${newProvider.id}');
+        final created = await _service.createProvider(newProvider);
+        if (mounted) {
+          Navigator.pop(context, created);
+        }
+      } catch (e) {
+        LogService.error('Failed to create provider: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to create: $e')));
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isSaving = false;
+          });
+        }
+      }
     }
   }
 
@@ -76,13 +140,18 @@ class _ProviderAddScreenState extends State<ProviderAddScreen> {
                     decoration: BoxDecoration(
                       color: Colors.amber.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: Colors.amber.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: CircleAvatar(
                       radius: 50,
                       backgroundImage: NetworkImage(_imageUrlController.text),
-                      onBackgroundImageError: (_, __) =>
-                          const Icon(Icons.person, size: 50, color: Colors.amber),
+                      onBackgroundImageError: (_, __) => const Icon(
+                        Icons.person,
+                        size: 50,
+                        color: Colors.amber,
+                      ),
                     ),
                   ),
                 ),
@@ -97,11 +166,21 @@ class _ProviderAddScreenState extends State<ProviderAddScreen> {
                 const SizedBox(height: 20),
 
                 _LabelText('Category'),
-                _GlassInput(
-                  controller: _categoryController,
-                  hint: 'e.g. VIP Lounge, Massage, etc.',
-                  validator: (v) => v!.isEmpty ? 'Category is required' : null,
-                ),
+                if (_isLoadingCategories)
+                  const Center(
+                    child: CircularProgressIndicator(color: Colors.amber),
+                  )
+                else
+                  _GlassDropdown(
+                    value: _selectedCategory,
+                    items: _categories,
+                    hint: 'Select Category',
+                    onChanged: (ComboBox? value) {
+                      setState(() {
+                        _selectedCategory = value;
+                      });
+                    },
+                  ),
                 const SizedBox(height: 20),
 
                 _LabelText('Price Per Hour (\$)'),
@@ -128,7 +207,8 @@ class _ProviderAddScreenState extends State<ProviderAddScreen> {
                   controller: _descriptionController,
                   hint: 'Describe the services provided...',
                   maxLines: 4,
-                  validator: (v) => v!.isEmpty ? 'Description is required' : null,
+                  validator: (v) =>
+                      v!.isEmpty ? 'Description is required' : null,
                 ),
                 const SizedBox(height: 40),
 
@@ -136,7 +216,7 @@ class _ProviderAddScreenState extends State<ProviderAddScreen> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: _saveProvider,
+                    onPressed: _isSaving ? null : _saveProvider,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.amber,
                       foregroundColor: Colors.black,
@@ -145,13 +225,22 @@ class _ProviderAddScreenState extends State<ProviderAddScreen> {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
-                      'Create Provider',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: _isSaving
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.black,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            'Create Provider',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ],
@@ -183,6 +272,52 @@ class _LabelText extends StatelessWidget {
   }
 }
 
+class _GlassDropdown extends StatelessWidget {
+  final ComboBox? value;
+  final List<ComboBox> items;
+  final String hint;
+  final void Function(ComboBox?) onChanged;
+
+  const _GlassDropdown({
+    required this.value,
+    required this.items,
+    required this.hint,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<ComboBox>(
+          value: value,
+          isExpanded: true,
+          dropdownColor: const Color(0xFF2A2A2A),
+          hint: Text(
+            hint,
+            style: const TextStyle(color: Colors.white24, fontSize: 14),
+          ),
+          icon: const Icon(LucideIcons.chevronDown, color: Colors.white54),
+          style: const TextStyle(color: Colors.white),
+          items: items.map((ComboBox item) {
+            return DropdownMenuItem<ComboBox>(
+              value: item,
+              child: Text(item.name),
+            );
+          }).toList(),
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+}
+
 class _GlassInput extends StatelessWidget {
   final TextEditingController controller;
   final String hint;
@@ -206,9 +341,7 @@ class _GlassInput extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: TextFormField(
         controller: controller,
@@ -220,8 +353,10 @@ class _GlassInput extends StatelessWidget {
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: const TextStyle(color: Colors.white24, fontSize: 14),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ),
           border: InputBorder.none,
         ),
       ),

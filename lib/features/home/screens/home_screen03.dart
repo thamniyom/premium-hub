@@ -4,7 +4,6 @@ import 'package:premium_hub/main.dart';
 import 'package:provider/provider.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../services/models/service_provider.dart';
-import '../../services/screens/service_detail_screen.dart';
 import '../../services/screens/service_list_screen.dart';
 
 class HomeScreen03 extends StatelessWidget {
@@ -171,26 +170,26 @@ class HomeScreen03 extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ServiceDetailScreen(
-                              provider: ServiceProvider(
-                                id: 'online-$index',
-                                name: 'User ${index + 1}',
-                                category: 'Provider',
-                                imageUrl:
-                                    'https://randomuser.me/api/portraits/men/${index + 20}.jpg',
-                                rating: 4.8,
-                                reviewCount: 42,
-                                description:
-                                    'Experienced professional provider ready to help you.',
-                                pricePerHour: 50.0,
-                                isOnline: true,
-                              ),
-                            ),
-                          ),
-                        );
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => ServiceDetailScreen(
+                        //       provider: ServiceProvider(
+                        //         id: 'online-$index',
+                        //         name: 'User ${index + 1}',
+                        //         category: 'Provider',
+                        //         imageUrl:
+                        //             'https://randomuser.me/api/portraits/men/${index + 20}.jpg',
+                        //         rating: 4.8,
+                        //         reviewCount: 42,
+                        //         description:
+                        //             'Experienced professional provider ready to help you.',
+                        //         pricePerHour: 50.0,
+                        //         isOnline: true,
+                        //       ),
+                        //     ),
+                        //   ),
+                        // );
                       },
                       child: Column(
                         children: [
@@ -267,25 +266,25 @@ class HomeScreen03 extends StatelessWidget {
                       'https://images.unsplash.com/photo-1560185127-6ed189bf02f4?q=80&w=2600&auto=format&fit=crop&sig=$index';
                   return GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ServiceDetailScreen(
-                            provider: ServiceProvider(
-                              id: 'featured-$index',
-                              name: 'Provider ${index + 1}',
-                              category: 'Expert',
-                              imageUrl: imageUrl,
-                              rating: 4.9,
-                              reviewCount: 156,
-                              description:
-                                  'Top-rated featured provider with excellent service history.',
-                              pricePerHour: 95.0,
-                              isOnline: true,
-                            ),
-                          ),
-                        ),
-                      );
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) => ServiceDetailScreen(
+                      //       provider: ServiceProvider(
+                      //         id: 'featured-$index',
+                      //         name: 'Provider ${index + 1}',
+                      //         category: 'Expert',
+                      //         imageUrl: imageUrl,
+                      //         rating: 4.9,
+                      //         reviewCount: 156,
+                      //         description:
+                      //             'Top-rated featured provider with excellent service history.',
+                      //         pricePerHour: 95.0,
+                      //         isOnline: true,
+                      //       ),
+                      //     ),
+                      //   ),
+                      // );
                     },
                     child: GlassCard(
                       width: 100,

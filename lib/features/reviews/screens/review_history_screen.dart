@@ -10,8 +10,9 @@ class ReviewHistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Filter demo bookings for "completed" bookings that need a review
+    LogService.screenLoad('ReviewHistoryScreen');
     final List<Booking> pendingReviews = demoBookings
-        .where((booking) => booking.status == BookingStatus.completed)
+        .where((booking) => booking.statusBooking == BookingStatus.completed)
         .toList();
 
     return Scaffold(
@@ -41,8 +42,9 @@ class ReviewHistoryScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     _StatItem(
-                        label: 'Pending Reviews',
-                        value: pendingReviews.length.toString()),
+                      label: 'Pending Reviews',
+                      value: pendingReviews.length.toString(),
+                    ),
                     Container(width: 1, height: 40, color: Colors.white12),
                     const _StatItem(label: 'Avg Rating Given', value: '4.8'),
                   ],
@@ -55,9 +57,9 @@ class ReviewHistoryScreen extends StatelessWidget {
               child: Text(
                 'Available for Review',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -111,13 +113,18 @@ class ReviewHistoryScreen extends StatelessWidget {
                           const SizedBox(height: 20),
                           const Row(
                             children: [
-                              Icon(LucideIcons.checkCircle2,
-                                  color: Colors.green, size: 14),
+                              Icon(
+                                LucideIcons.checkCircle2,
+                                color: Colors.green,
+                                size: 14,
+                              ),
                               SizedBox(width: 6),
                               Text(
                                 'Booking Completed - Pending Review',
                                 style: TextStyle(
-                                    color: Colors.white70, fontSize: 13),
+                                  color: Colors.white70,
+                                  fontSize: 13,
+                                ),
                               ),
                             ],
                           ),
@@ -147,7 +154,9 @@ class ReviewHistoryScreen extends StatelessWidget {
                               child: const Text(
                                 'Write Review',
                                 style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 15),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
                               ),
                             ),
                           ),
@@ -185,10 +194,7 @@ class _StatItem extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           label,
-          style: const TextStyle(
-            color: Colors.white54,
-            fontSize: 12,
-          ),
+          style: const TextStyle(color: Colors.white54, fontSize: 12),
         ),
       ],
     );
@@ -222,10 +228,7 @@ class _GlassBox extends StatelessWidget {
           ],
         ),
       ),
-      child: Padding(
-        padding: padding,
-        child: child,
-      ),
+      child: Padding(padding: padding, child: child),
     );
   }
 }

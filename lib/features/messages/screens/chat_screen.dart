@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:premium_hub/core/services/log_service.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../models/conversation.dart';
 import '../models/chat_message.dart';
@@ -32,19 +33,22 @@ class _ChatScreenState extends State<ChatScreen> {
   void _sendMessage() {
     if (_msgController.text.trim().isEmpty) return;
     setState(() {
-      _messages.add(ChatMessage(
-        id: DateTime.now().toString(),
-        senderId: 'me',
-        text: _msgController.text.trim(),
-        timestamp: DateTime.now(),
-        isMe: true,
-      ));
+      _messages.add(
+        ChatMessage(
+          id: DateTime.now().toString(),
+          senderId: 'me',
+          text: _msgController.text.trim(),
+          timestamp: DateTime.now(),
+          isMe: true,
+        ),
+      );
       _msgController.clear();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('ChatScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -52,7 +56,9 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             CircleAvatar(
               radius: 18,
-              backgroundImage: NetworkImage(widget.conversation.otherParticipantAvatar),
+              backgroundImage: NetworkImage(
+                widget.conversation.otherParticipantAvatar,
+              ),
             ),
             const SizedBox(width: 12),
             Column(
@@ -60,13 +66,18 @@ class _ChatScreenState extends State<ChatScreen> {
               children: [
                 Text(
                   widget.conversation.otherParticipantName,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 Text(
                   widget.conversation.isOnline ? 'Online' : 'Offline',
                   style: TextStyle(
                     fontSize: 12,
-                    color: widget.conversation.isOnline ? Colors.green : Colors.white54,
+                    color: widget.conversation.isOnline
+                        ? Colors.green
+                        : Colors.white54,
                   ),
                 ),
               ],
@@ -96,13 +107,16 @@ class _ChatScreenState extends State<ChatScreen> {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: Row(
-                    mainAxisAlignment:
-                        message.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+                    mainAxisAlignment: message.isMe
+                        ? MainAxisAlignment.end
+                        : MainAxisAlignment.start,
                     children: [
                       if (!message.isMe) ...[
-                         CircleAvatar(
+                        CircleAvatar(
                           radius: 16,
-                          backgroundImage: NetworkImage(widget.conversation.otherParticipantAvatar),
+                          backgroundImage: NetworkImage(
+                            widget.conversation.otherParticipantAvatar,
+                          ),
                         ),
                         const SizedBox(width: 8),
                       ],
@@ -110,14 +124,20 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: (message.isMe ? Colors.amber : Colors.white12)
-                                .withValues(alpha: 0.1),
+                            color:
+                                (message.isMe ? Colors.amber : Colors.white12)
+                                    .withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.1),
+                            ),
                           ),
                           child: Text(
                             message.text,
-                            style: const TextStyle(color: Colors.white, fontSize: 14),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
                           ),
                         ),
                       ),
@@ -156,7 +176,11 @@ class _ChatScreenState extends State<ChatScreen> {
                       color: Colors.amber,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(LucideIcons.send, color: Colors.black, size: 20),
+                    child: const Icon(
+                      LucideIcons.send,
+                      color: Colors.black,
+                      size: 20,
+                    ),
                   ),
                 ),
               ],

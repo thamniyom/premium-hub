@@ -4,14 +4,13 @@ import '../../../core/services/log_service.dart';
 import '../../services/models/lounge.dart';
 import 'lounge_add_screen.dart';
 import 'lounge_edit_screen.dart';
-import 'lounge_amenities_screen.dart';
+import 'lounge_amenity_screen.dart';
 
 class LoungeManagementScreen extends StatefulWidget {
   const LoungeManagementScreen({super.key});
 
   @override
-  State<LoungeManagementScreen> createState() =>
-      _LoungeManagementScreenState();
+  State<LoungeManagementScreen> createState() => _LoungeManagementScreenState();
 }
 
 class _LoungeManagementScreenState extends State<LoungeManagementScreen> {
@@ -35,9 +34,11 @@ class _LoungeManagementScreenState extends State<LoungeManagementScreen> {
   void _filterLounges(String query) {
     setState(() {
       _filteredLounges = _allLounges
-          .where((l) =>
-              l.name.toLowerCase().contains(query.toLowerCase()) ||
-              l.category.toLowerCase().contains(query.toLowerCase()))
+          .where(
+            (l) =>
+                l.name.toLowerCase().contains(query.toLowerCase()) ||
+                l.category.name.toLowerCase().contains(query.toLowerCase()),
+          )
           .toList();
     });
   }
@@ -53,13 +54,14 @@ class _LoungeManagementScreenState extends State<LoungeManagementScreen> {
         rating: l.rating,
         reviewCount: l.reviewCount,
         description: l.description,
-        pricePerEntry: l.pricePerEntry,
+        pricePerHour: l.pricePerHour,
         isOpen: !l.isOpen,
+        amenities: l.amenities,
       );
 
       // Update filtered list
       _filteredLounges[index] = updatedLounge;
-      
+
       // Update master list
       final masterIndex = _allLounges.indexWhere((item) => item.id == l.id);
       if (masterIndex != -1) {
@@ -76,15 +78,17 @@ class _LoungeManagementScreenState extends State<LoungeManagementScreen> {
   void _updateLounge(Lounge updatedLounge) {
     setState(() {
       // Update master list
-      final masterIndex =
-          _allLounges.indexWhere((l) => l.id == updatedLounge.id);
+      final masterIndex = _allLounges.indexWhere(
+        (l) => l.id == updatedLounge.id,
+      );
       if (masterIndex != -1) {
         _allLounges[masterIndex] = updatedLounge;
       }
 
       // Update filtered list (if it's currently showing)
-      final filteredIndex =
-          _filteredLounges.indexWhere((l) => l.id == updatedLounge.id);
+      final filteredIndex = _filteredLounges.indexWhere(
+        (l) => l.id == updatedLounge.id,
+      );
       if (filteredIndex != -1) {
         _filteredLounges[filteredIndex] = updatedLounge;
       }
@@ -153,7 +157,11 @@ class _LoungeManagementScreenState extends State<LoungeManagementScreen> {
                   decoration: const InputDecoration(
                     hintText: 'Search lounge name or category...',
                     hintStyle: TextStyle(color: Colors.white24),
-                    icon: Icon(LucideIcons.search, color: Colors.amber, size: 20),
+                    icon: Icon(
+                      LucideIcons.search,
+                      color: Colors.amber,
+                      size: 20,
+                    ),
                     border: InputBorder.none,
                   ),
                 ),
@@ -207,7 +215,7 @@ class _LoungeManagementScreenState extends State<LoungeManagementScreen> {
                                             ),
                                           ),
                                           Text(
-                                            lounge.category,
+                                            lounge.category.name,
                                             style: const TextStyle(
                                               color: Colors.white54,
                                               fontSize: 13,
@@ -220,7 +228,9 @@ class _LoungeManagementScreenState extends State<LoungeManagementScreen> {
                                       value: lounge.isOpen,
                                       onChanged: (_) => _toggleStatus(index),
                                       activeThumbColor: Colors.amber,
-                                      activeTrackColor: Colors.amber.withValues(alpha: 0.3),
+                                      activeTrackColor: Colors.amber.withValues(
+                                        alpha: 0.3,
+                                      ),
                                       inactiveThumbColor: Colors.white24,
                                       inactiveTrackColor: Colors.white10,
                                     ),
@@ -246,7 +256,7 @@ class _LoungeManagementScreenState extends State<LoungeManagementScreen> {
                                     _SmallInfoItem(
                                       label: 'Entry Fee',
                                       value:
-                                          '\$${lounge.pricePerEntry.toStringAsFixed(0)}',
+                                          '\$${lounge.pricePerHour.toStringAsFixed(0)}',
                                       icon: Icons.payments,
                                       iconColor: Colors.green,
                                     ),
@@ -261,13 +271,15 @@ class _LoungeManagementScreenState extends State<LoungeManagementScreen> {
                                         icon: LucideIcons.pencil,
                                         onTap: () async {
                                           LogService.info(
-                                              'Opening edit screen for lounge: ${lounge.name}');
+                                            'Opening edit screen for lounge: ${lounge.name}',
+                                          );
                                           final updated = await Navigator.push(
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) =>
                                                   LoungeEditScreen(
-                                                      lounge: lounge),
+                                                    lounge: lounge,
+                                                  ),
                                             ),
                                           );
 
@@ -275,11 +287,13 @@ class _LoungeManagementScreenState extends State<LoungeManagementScreen> {
                                               updated is Lounge) {
                                             _updateLounge(updated);
                                             if (context.mounted) {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
                                                 SnackBar(
                                                   content: Text(
-                                                      '${updated.name} updated successfully'),
+                                                    '${updated.name} updated successfully',
+                                                  ),
                                                   backgroundColor: Colors.green,
                                                 ),
                                               );
@@ -295,13 +309,15 @@ class _LoungeManagementScreenState extends State<LoungeManagementScreen> {
                                         icon: LucideIcons.layoutGrid,
                                         onTap: () async {
                                           LogService.info(
-                                              'Opening amenities screen for lounge: ${lounge.name}');
+                                            'Opening amenities screen for lounge: ${lounge.name}',
+                                          );
                                           final updated = await Navigator.push(
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) =>
-                                                  LoungeAmenitiesScreen(
-                                                      lounge: lounge),
+                                                  LoungeAmenityScreen(
+                                                    lounge: lounge,
+                                                  ),
                                             ),
                                           );
 
@@ -309,11 +325,13 @@ class _LoungeManagementScreenState extends State<LoungeManagementScreen> {
                                               updated is Lounge) {
                                             _updateLounge(updated);
                                             if (context.mounted) {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
                                                 SnackBar(
                                                   content: Text(
-                                                      'Amenities for ${updated.name} updated'),
+                                                    'Amenities for ${updated.name} updated',
+                                                  ),
                                                   backgroundColor: Colors.amber,
                                                 ),
                                               );
@@ -457,10 +475,7 @@ class _GlassBox extends StatelessWidget {
           ],
         ),
       ),
-      child: Padding(
-        padding: padding,
-        child: child,
-      ),
+      child: Padding(padding: padding, child: child),
     );
   }
 }

@@ -7,36 +7,22 @@ import '../services/booking_service.dart';
 import 'package:premium_hub/features/services/models/lounge.dart';
 
 // ignore: must_be_immutable
-class BookingFormScreen extends StatefulWidget {
+class BookingFormScreen03 extends StatefulWidget {
   Provider? provider;
   Lounge? lounge;
   List<Provider>? providers;
 
-  BookingFormScreen({super.key, this.provider, this.lounge, this.providers});
+  BookingFormScreen03({super.key, this.provider, this.lounge, this.providers});
 
   @override
-  State<BookingFormScreen> createState() => _BookingFormScreenState();
+  State<BookingFormScreen03> createState() => _BookingFormScreenState();
 }
 
-class _BookingFormScreenState extends State<BookingFormScreen> {
+class _BookingFormScreenState extends State<BookingFormScreen03> {
   DateTime selectedDate = DateTime.now().add(const Duration(days: 1));
   String selectedTime = '10:00 AM';
   int selectedDuration = 1;
   bool _isSubmitting = false;
-
-  double get _pricePerHour {
-    if (widget.providers != null && widget.providers!.isNotEmpty) {
-      return widget.providers!.fold<double>(
-        0.0,
-        (sum, p) => sum + p.pricePerHour,
-      );
-    }
-    return widget.provider?.pricePerHour ?? widget.lounge?.pricePerHour ?? 0.0;
-  }
-
-  double get _pricePerHourLounge {
-    return widget.lounge?.pricePerHour ?? widget.lounge?.pricePerHour ?? 0.0;
-  }
 
   final List<String> timeSlots = [
     '09:00 AM',
@@ -107,70 +93,6 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                               ),
                             ),
                           ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            if (widget.providers != null && widget.providers!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: _GlassBox(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Selected Providers',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white70,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      ...widget.providers!.map(
-                        (provider) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 20,
-                                backgroundImage: provider.imageUrl.isNotEmpty
-                                    ? NetworkImage(provider.imageUrl)
-                                    : null,
-                                child: provider.imageUrl.isEmpty
-                                    ? const Icon(
-                                        Icons.person,
-                                        color: Colors.white,
-                                      )
-                                    : null,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      provider.name,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    Text(
-                                      provider.category?.name ?? '',
-                                      style: const TextStyle(
-                                        color: Colors.amber,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
                       ),
                     ],
@@ -386,7 +308,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                   _SummaryRow(
                     label: 'Price per hour',
                     value:
-                        '\$${_pricePerHour.toInt() + _pricePerHourLounge.toInt()}',
+                        '\$${(widget.provider?.pricePerHour ?? widget.lounge?.pricePerHour ?? 0).toInt()}',
                   ),
                   const SizedBox(height: 12),
                   _SummaryRow(
@@ -397,7 +319,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                   _SummaryRow(
                     label: 'Total Amount',
                     value:
-                        '\$${((_pricePerHour + _pricePerHourLounge) * selectedDuration).toInt()}',
+                        '\$${((widget.provider?.pricePerHour ?? widget.lounge?.pricePerHour ?? 0) * selectedDuration).toInt()}',
                     isTotal: true,
                   ),
                 ],
@@ -433,23 +355,16 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                             Duration(hours: selectedDuration),
                           );
 
-                          final pricePerHour = _pricePerHour;
+                          final pricePerHour =
+                              widget.provider?.pricePerHour ??
+                              widget.lounge?.pricePerHour ??
+                              0;
                           final name =
-                              (widget.providers != null &&
-                                  widget.providers!.isNotEmpty)
-                              ? widget.providers!.map((p) => p.name).join(', ')
-                              : (widget.provider?.name ??
-                                    widget.lounge?.name ??
-                                    '');
-                          final providerDocumentIds =
-                              (widget.providers != null &&
-                                  widget.providers!.isNotEmpty)
-                              ? widget.providers!
-                                    .map((p) => p.documentId)
-                                    .toList()
-                              : (widget.provider != null
-                                    ? [widget.provider!.documentId]
-                                    : <String>[]);
+                              widget.provider?.name ??
+                              widget.lounge?.name ??
+                              '';
+                          final providerDocumentId =
+                              widget.provider?.documentId ?? '';
                           final loungeDocumentId =
                               widget.lounge?.documentId ?? '';
 
@@ -460,7 +375,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                           });
 
                           await BookingService().createBooking(
-                            providerDocumentIds: providerDocumentIds,
+                            providerDocumentIds: [providerDocumentId],
                             loungeDocumentId: loungeDocumentId,
                             startTime: startTime,
                             endTime: endTime,

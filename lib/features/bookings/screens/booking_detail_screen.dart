@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
+import 'package:premium_hub/core/services/log_service.dart';
 import '../../messages/models/conversation.dart';
 import '../../messages/screens/chat_screen.dart';
 import '../models/booking.dart';
@@ -12,6 +13,7 @@ class BookingDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('BookingDetailScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -39,10 +41,13 @@ class BookingDetailScreen extends StatelessWidget {
                         children: [
                           const Text(
                             'Status',
-                            style: TextStyle(color: Colors.white54, fontSize: 13),
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontSize: 13,
+                            ),
                           ),
                           const SizedBox(height: 4),
-                          _StatusLabel(status: booking.status),
+                          _StatusLabel(statusBooking: booking.statusBooking),
                         ],
                       ),
                       Column(
@@ -50,15 +55,19 @@ class BookingDetailScreen extends StatelessWidget {
                         children: [
                           const Text(
                             'Booking ID',
-                            style: TextStyle(color: Colors.white54, fontSize: 13),
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontSize: 13,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             '#PH-${booking.id}0${DateTime.now().year}',
                             style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15),
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
                           ),
                         ],
                       ),
@@ -70,7 +79,9 @@ class BookingDetailScreen extends StatelessWidget {
                       _DateInfo(
                         icon: LucideIcons.calendar,
                         label: 'Date',
-                        value: DateFormat('MMM dd, yyyy').format(booking.dateTime),
+                        value: DateFormat(
+                          'MMM dd, yyyy',
+                        ).format(booking.dateTime),
                       ),
                       const SizedBox(width: 40),
                       _DateInfo(
@@ -125,7 +136,10 @@ class BookingDetailScreen extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(LucideIcons.messageSquare, color: Colors.amber),
+                    icon: const Icon(
+                      LucideIcons.messageSquare,
+                      color: Colors.amber,
+                    ),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -135,7 +149,8 @@ class BookingDetailScreen extends StatelessWidget {
                               id: booking.id,
                               otherParticipantName: booking.providerName,
                               otherParticipantAvatar: booking.imageUrl,
-                              lastMessage: 'Hi there! I have a question about my booking.',
+                              lastMessage:
+                                  'Hi there! I have a question about my booking.',
                               lastMessageTime: DateTime.now(),
                               isOnline: true,
                             ),
@@ -165,11 +180,16 @@ class BookingDetailScreen extends StatelessWidget {
                 children: [
                   _DetailRow(label: 'Service', value: booking.serviceType),
                   const Divider(color: Colors.white10, height: 24),
-                  _DetailRow(label: 'Duration', value: '1.5 Hours'),
+                  _DetailRow(
+                    label: 'Duration',
+                    value:
+                        '\$${(booking.endTime?.difference(booking.dateTime).inHours)?.toStringAsFixed(1)} Hours',
+                  ),
                   const Divider(color: Colors.white10, height: 24),
                   _DetailRow(
                     label: 'Price per hr',
-                    value: '\$${(booking.price / 1.5).toStringAsFixed(1)}',
+                    value:
+                        '\$${(booking.price / (booking.endTime!.difference(booking.dateTime).inHours)).toStringAsFixed(1)}',
                   ),
                   const Divider(color: Colors.white10, height: 24),
                   Row(
@@ -199,7 +219,7 @@ class BookingDetailScreen extends StatelessWidget {
             const SizedBox(height: 40),
 
             // Action Buttons
-            if (booking.status == BookingStatus.upcoming) ...[
+            if (booking.statusBooking == BookingStatus.upcoming) ...[
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -237,7 +257,7 @@ class BookingDetailScreen extends StatelessWidget {
                   ),
                 ),
               ),
-            ] else if (booking.status == BookingStatus.completed) ...[
+            ] else if (booking.statusBooking == BookingStatus.completed) ...[
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -266,16 +286,16 @@ class BookingDetailScreen extends StatelessWidget {
 }
 
 class _StatusLabel extends StatelessWidget {
-  final BookingStatus status;
+  final BookingStatus statusBooking;
 
-  const _StatusLabel({required this.status});
+  const _StatusLabel({required this.statusBooking});
 
   @override
   Widget build(BuildContext context) {
     Color color;
     String text;
 
-    switch (status) {
+    switch (statusBooking) {
       case BookingStatus.upcoming:
         color = Colors.blueAccent;
         text = 'Upcoming';
@@ -288,15 +308,19 @@ class _StatusLabel extends StatelessWidget {
         color = Colors.redAccent;
         text = 'Cancelled';
         break;
+      case BookingStatus.pending:
+        color = Colors.amber;
+        text = 'Pending';
+        break;
+      case BookingStatus.confirmed:
+        color = Colors.green;
+        text = 'Confirmed';
+        break;
     }
 
     return Text(
       text,
-      style: TextStyle(
-        color: color,
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-      ),
+      style: TextStyle(color: color, fontSize: 18, fontWeight: FontWeight.bold),
     );
   }
 }
@@ -306,7 +330,11 @@ class _DateInfo extends StatelessWidget {
   final String label;
   final String value;
 
-  const _DateInfo({required this.icon, required this.label, required this.value});
+  const _DateInfo({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -332,7 +360,10 @@ class _DateInfo extends StatelessWidget {
             Text(
               value,
               style: const TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
             ),
           ],
         ),
@@ -372,14 +403,20 @@ class _DetailRow extends StatelessWidget {
 class _GlassBox extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
-  const _GlassBox({required this.child, this.padding = const EdgeInsets.all(16)});
+  const _GlassBox({
+    required this.child,
+    this.padding = const EdgeInsets.all(16),
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.2),
+          width: 1,
+        ),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

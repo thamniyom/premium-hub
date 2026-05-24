@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
+import 'package:premium_hub/core/services/log_service.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../models/conversation.dart';
 import 'chat_screen.dart';
@@ -18,8 +19,14 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredConversations = _conversations.where((c) =>
-        c.otherParticipantName.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+    LogService.screenLoad('ConversationListScreen');
+    final filteredConversations = _conversations
+        .where(
+          (c) => c.otherParticipantName.toLowerCase().contains(
+            _searchQuery.toLowerCase(),
+          ),
+        )
+        .toList();
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -33,13 +40,16 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                   Text(
                     'Messages',
                     style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                   const Spacer(),
                   IconButton(
-                    icon: const Icon(LucideIcons.moreVertical, color: Colors.white70),
+                    icon: const Icon(
+                      LucideIcons.moreVertical,
+                      color: Colors.white70,
+                    ),
                     onPressed: () {},
                   ),
                 ],
@@ -56,7 +66,11 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                   decoration: const InputDecoration(
                     hintText: 'Search conversations...',
                     hintStyle: TextStyle(color: Colors.white54),
-                    icon: Icon(LucideIcons.search, color: Colors.amber, size: 20),
+                    icon: Icon(
+                      LucideIcons.search,
+                      color: Colors.amber,
+                      size: 20,
+                    ),
                     border: InputBorder.none,
                   ),
                 ),
@@ -75,7 +89,8 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ChatScreen(conversation: conversation),
+                          builder: (context) =>
+                              ChatScreen(conversation: conversation),
                         ),
                       ),
                       child: GlassCard(
@@ -87,7 +102,9 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                               children: [
                                 CircleAvatar(
                                   radius: 28,
-                                  backgroundImage: NetworkImage(conversation.otherParticipantAvatar),
+                                  backgroundImage: NetworkImage(
+                                    conversation.otherParticipantAvatar,
+                                  ),
                                 ),
                                 if (conversation.isOnline)
                                   Positioned(
@@ -99,7 +116,10 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                                       decoration: BoxDecoration(
                                         color: Colors.green,
                                         shape: BoxShape.circle,
-                                        border: Border.all(color: Colors.black, width: 2),
+                                        border: Border.all(
+                                          color: Colors.black,
+                                          width: 2,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -112,7 +132,8 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         conversation.otherParticipantName,
@@ -123,7 +144,9 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                                         ),
                                       ),
                                       Text(
-                                        DateFormat('hh:mm a').format(conversation.lastMessageTime),
+                                        DateFormat(
+                                          'hh:mm a',
+                                        ).format(conversation.lastMessageTime),
                                         style: const TextStyle(
                                           fontSize: 12,
                                           color: Colors.white54,
@@ -144,7 +167,8 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                                             color: conversation.unreadCount > 0
                                                 ? Colors.white
                                                 : Colors.white54,
-                                            fontWeight: conversation.unreadCount > 0
+                                            fontWeight:
+                                                conversation.unreadCount > 0
                                                 ? FontWeight.bold
                                                 : FontWeight.normal,
                                           ),
@@ -152,7 +176,9 @@ class _ConversationListScreenState extends State<ConversationListScreen> {
                                       ),
                                       if (conversation.unreadCount > 0)
                                         Container(
-                                          margin: const EdgeInsets.only(left: 8),
+                                          margin: const EdgeInsets.only(
+                                            left: 8,
+                                          ),
                                           padding: const EdgeInsets.all(6),
                                           decoration: const BoxDecoration(
                                             color: Colors.amber,

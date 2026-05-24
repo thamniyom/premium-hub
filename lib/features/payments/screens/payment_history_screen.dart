@@ -10,6 +10,7 @@ class PaymentHistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Simulated payment data derived from demo bookings
+    LogService.screenLoad('PaymentHistoryScreen');
     final List<Map<String, dynamic>> payments = demoBookings.map((booking) {
       return {
         'id': 'TRX-${booking.id}09${DateTime.now().millisecond}',
@@ -17,7 +18,9 @@ class PaymentHistoryScreen extends StatelessWidget {
         'serviceType': booking.serviceType,
         'date': booking.dateTime,
         'amount': booking.price,
-        'status': booking.status == BookingStatus.completed ? 'Paid' : 'Pending',
+        'status': booking.statusBooking == BookingStatus.completed
+            ? 'Paid'
+            : 'Pending',
         'imageUrl': booking.imageUrl,
       };
     }).toList();
@@ -68,22 +71,28 @@ class PaymentHistoryScreen extends StatelessWidget {
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.green.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: const Row(
                             children: [
-                              Icon(LucideIcons.arrowUpRight,
-                                  color: Colors.green, size: 14),
+                              Icon(
+                                LucideIcons.arrowUpRight,
+                                color: Colors.green,
+                                size: 14,
+                              ),
                               SizedBox(width: 4),
                               Text(
                                 '12%',
                                 style: TextStyle(
-                                    color: Colors.green,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold),
+                                  color: Colors.green,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ],
                           ),
@@ -100,9 +109,9 @@ class PaymentHistoryScreen extends StatelessWidget {
               child: Text(
                 'Recent Transactions',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -121,7 +130,10 @@ class PaymentHistoryScreen extends StatelessWidget {
                     child: GestureDetector(
                       onTap: () {
                         final booking = demoBookings[index];
-                        LogService.providerTapped(booking.id, booking.providerName);
+                        LogService.providerTapped(
+                          booking.id,
+                          booking.providerName,
+                        );
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -136,8 +148,9 @@ class PaymentHistoryScreen extends StatelessWidget {
                           children: [
                             CircleAvatar(
                               radius: 24,
-                              backgroundImage:
-                                  NetworkImage(payment['imageUrl']),
+                              backgroundImage: NetworkImage(
+                                payment['imageUrl'],
+                              ),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -225,10 +238,7 @@ class _GlassBox extends StatelessWidget {
           ],
         ),
       ),
-      child: Padding(
-        padding: padding,
-        child: child,
-      ),
+      child: Padding(padding: padding, child: child),
     );
   }
 }

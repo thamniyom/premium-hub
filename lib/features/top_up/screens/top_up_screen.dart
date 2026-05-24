@@ -7,6 +7,7 @@ class TopUpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('TopUpScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -23,9 +24,9 @@ class TopUpScreen extends StatelessWidget {
               Text(
                 'Enter Amount',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(height: 24),
               // Amount Input
@@ -45,10 +46,7 @@ class TopUpScreen extends StatelessWidget {
                       size: 32,
                     ),
                     hintText: '0.00',
-                    hintStyle: TextStyle(
-                      color: Colors.white54,
-                      fontSize: 32,
-                    ),
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 32),
                   ),
                 ),
               ),
@@ -56,9 +54,9 @@ class TopUpScreen extends StatelessWidget {
               Text(
                 'Quick Select',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(height: 16),
               Row(
@@ -67,7 +65,8 @@ class TopUpScreen extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.only(right: 8.0),
                       child: GestureDetector(
-                        onTap: () => LogService.topUpQuickAmountSelected(amount),
+                        onTap: () =>
+                            LogService.topUpQuickAmountSelected(amount),
                         child: _GlassContainer(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           child: Center(
@@ -90,9 +89,9 @@ class TopUpScreen extends StatelessWidget {
               Text(
                 'Payment Method',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(height: 16),
               // Payment Method Card
@@ -132,7 +131,9 @@ class TopUpScreen extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    LogService.topUpConfirmed(0); // amount from controller in a full impl
+                    LogService.topUpConfirmed(
+                      0,
+                    ); // amount from controller in a full impl
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Top up successful!'),
@@ -151,10 +152,7 @@ class TopUpScreen extends StatelessWidget {
                   ),
                   child: const Text(
                     'Confirm Top Up',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -197,10 +195,7 @@ class _GlassContainer extends StatelessWidget {
             ],
           ),
         ),
-        child: Padding(
-          padding: padding,
-          child: child,
-        ),
+        child: Padding(padding: padding, child: child),
       ),
     );
   }

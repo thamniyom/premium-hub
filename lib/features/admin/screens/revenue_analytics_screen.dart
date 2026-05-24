@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:premium_hub/core/services/log_service.dart';
 
 class RevenueAnalyticsScreen extends StatefulWidget {
   const RevenueAnalyticsScreen({super.key});
@@ -286,6 +287,7 @@ class _KPIItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('RevenueAnalyticsScreen');
     return _GlassBox(
       padding: const EdgeInsets.all(20),
       child: Column(

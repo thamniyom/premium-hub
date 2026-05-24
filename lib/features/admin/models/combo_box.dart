@@ -6,7 +6,7 @@ class ComboBox {
   final String? valueStr;
   final int? valueInt;
 
-  ComboBox({
+  const ComboBox({
     this.id,
     this.documentId,
     required this.type,
@@ -25,9 +25,18 @@ class ComboBox {
       valueInt: json['valueInt'] as int?,
     );
   }
-
   Map<String, dynamic> toJson() {
     return {
+      'type': type,
+      'name': name,
+      if (valueStr != null) 'valueStr': valueStr,
+      if (valueInt != null) 'valueInt': valueInt,
+    };
+  }
+
+  Map<String, dynamic> toJsonId() {
+    return {
+      'documentId': documentId,
       'type': type,
       'name': name,
       if (valueStr != null) 'valueStr': valueStr,

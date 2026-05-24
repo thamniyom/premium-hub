@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../../services/models/service_provider.dart';
+import 'package:premium_hub/features/admin/services/provider_service.dart';
+import 'package:premium_hub/features/services/models/provider.dart';
 import 'provider_edit_screen.dart';
 import 'provider_add_screen.dart';
 import '../../../core/services/log_service.dart';
@@ -13,17 +14,48 @@ class ProviderTableScreen extends StatefulWidget {
 }
 
 class _ProviderTableScreenState extends State<ProviderTableScreen> {
-  late List<ServiceProvider> _fullData;
-  late List<ServiceProvider> _displayData;
+  late List<Provider> _fullData;
+  late List<Provider> _displayData;
   final TextEditingController _searchController = TextEditingController();
   bool _sortAscending = true;
   int _sortColumnIndex = 0;
 
+  final ProviderService _service = ProviderService();
+  bool _isLoading = true;
+
+  int _currentPage = 1;
+  final int _pageSize = 4;
+  bool _hasNextPage = true;
+
   @override
   void initState() {
     super.initState();
-    _fullData = List.from(demoProviders);
-    _displayData = List.from(_fullData);
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    setState(() => _isLoading = true);
+    try {
+      final providers = await _service.getProviders(
+        page: _currentPage,
+        pageSize: _pageSize,
+      );
+      setState(() {
+        _fullData = providers;
+        _displayData = providers;
+        _hasNextPage = providers.length == _pageSize;
+        _isLoading = false;
+        _onSearchChanged(_searchController.text);
+      });
+    } catch (e) {
+      LogService.error('Failed to load providers: $e');
+      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to load providers: $e')));
+      }
+    }
   }
 
   @override
@@ -36,8 +68,9 @@ class _ProviderTableScreenState extends State<ProviderTableScreen> {
     setState(() {
       _displayData = _fullData.where((p) {
         final nameMatch = p.name.toLowerCase().contains(query.toLowerCase());
-        final categoryMatch =
-            p.category.toLowerCase().contains(query.toLowerCase());
+        final categoryMatch = p.category.name.toLowerCase().contains(
+          query.toLowerCase(),
+        );
         return nameMatch || categoryMatch;
       }).toList();
     });
@@ -49,23 +82,28 @@ class _ProviderTableScreenState extends State<ProviderTableScreen> {
       _sortAscending = ascending;
 
       if (columnIndex == 0) {
-        _displayData.sort((a, b) => ascending
-            ? a.name.compareTo(b.name)
-            : b.name.compareTo(a.name));
+        _displayData.sort(
+          (a, b) =>
+              ascending ? a.name.compareTo(b.name) : b.name.compareTo(a.name),
+        );
       } else if (columnIndex == 2) {
-        _displayData.sort((a, b) => ascending
-            ? a.rating.compareTo(b.rating)
-            : b.rating.compareTo(a.rating));
+        _displayData.sort(
+          (a, b) => ascending
+              ? a.rating.compareTo(b.rating)
+              : b.rating.compareTo(a.rating),
+        );
       } else if (columnIndex == 3) {
-        _displayData.sort((a, b) => ascending
-            ? a.pricePerHour.compareTo(b.pricePerHour)
-            : b.pricePerHour.compareTo(a.pricePerHour));
+        _displayData.sort(
+          (a, b) => ascending
+              ? a.pricePerHour.compareTo(b.pricePerHour)
+              : b.pricePerHour.compareTo(a.pricePerHour),
+        );
       }
     });
   }
 
-  Future<void> _editProvider(ServiceProvider provider) async {
-    final updatedProvider = await Navigator.push<ServiceProvider>(
+  Future<void> _editProvider(Provider provider) async {
+    final updatedProvider = await Navigator.push<Provider>(
       context,
       MaterialPageRoute(
         builder: (context) => ProviderEditScreen(provider: provider),
@@ -87,11 +125,9 @@ class _ProviderTableScreenState extends State<ProviderTableScreen> {
   }
 
   Future<void> _addNewProvider() async {
-    final newProvider = await Navigator.push<ServiceProvider>(
+    final newProvider = await Navigator.push<Provider>(
       context,
-      MaterialPageRoute(
-        builder: (context) => const ProviderAddScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const ProviderAddScreen()),
     );
 
     if (newProvider != null) {
@@ -107,13 +143,16 @@ class _ProviderTableScreenState extends State<ProviderTableScreen> {
     }
   }
 
-  Future<void> _deleteProvider(ServiceProvider provider) async {
+  Future<void> _deleteProvider(Provider provider) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF1E1E1E),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Delete Entry', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Delete Entry',
+          style: TextStyle(color: Colors.white),
+        ),
         content: Text(
           'Are you sure you want to delete "${provider.name}"? This action cannot be undone.',
           style: const TextStyle(color: Colors.white70),
@@ -121,30 +160,51 @@ class _ProviderTableScreenState extends State<ProviderTableScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('CANCEL', style: TextStyle(color: Colors.white54)),
+            child: const Text(
+              'CANCEL',
+              style: TextStyle(color: Colors.white54),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('DELETE', style: TextStyle(color: Colors.redAccent)),
+            child: const Text(
+              'DELETE',
+              style: TextStyle(color: Colors.redAccent),
+            ),
           ),
         ],
       ),
     );
 
     if (confirmed == true) {
-      setState(() {
-        _fullData.removeWhere((p) => p.id == provider.id);
-        _onSearchChanged(_searchController.text);
-        LogService.info('Provider deleted from BackOffice: ${provider.id}');
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${provider.name} deleted')),
-      );
+      try {
+        if (provider.documentId != null) {
+          await _service.deleteProvider(provider.documentId!);
+        }
+        setState(() {
+          _fullData.removeWhere((p) => p.id == provider.id);
+          _onSearchChanged(_searchController.text);
+          LogService.info('Provider deleted from BackOffice: ${provider.id}');
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('${provider.name} deleted')));
+        }
+      } catch (e) {
+        LogService.error('Failed to delete provider: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to delete provider: $e')),
+          );
+        }
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('ProviderTableScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -175,8 +235,11 @@ class _ProviderTableScreenState extends State<ProviderTableScreen> {
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
                     children: [
-                      const Icon(LucideIcons.search,
-                          color: Colors.amber, size: 20),
+                      const Icon(
+                        LucideIcons.search,
+                        color: Colors.amber,
+                        size: 20,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: TextField(
@@ -191,8 +254,11 @@ class _ProviderTableScreenState extends State<ProviderTableScreen> {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(LucideIcons.filter,
-                            color: Colors.white54, size: 20),
+                        icon: const Icon(
+                          LucideIcons.filter,
+                          color: Colors.white54,
+                          size: 20,
+                        ),
                         onPressed: () {},
                       ),
                     ],
@@ -200,91 +266,176 @@ class _ProviderTableScreenState extends State<ProviderTableScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: _GlassBox(
-                  child: DataTable(
-                    sortAscending: _sortAscending,
-                    sortColumnIndex: _sortColumnIndex,
-                    headingTextStyle: const TextStyle(
-                      color: Colors.amber,
-                      fontWeight: FontWeight.bold,
+              _isLoading
+                  ? const Padding(
+                      padding: EdgeInsets.only(top: 40),
+                      child: Center(
+                        child: CircularProgressIndicator(color: Colors.amber),
+                      ),
+                    )
+                  : SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: _GlassBox(
+                        child: DataTable(
+                          sortAscending: _sortAscending,
+                          sortColumnIndex: _sortColumnIndex,
+                          headingTextStyle: const TextStyle(
+                            color: Colors.amber,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          dataTextStyle: const TextStyle(color: Colors.white70),
+                          columns: [
+                            DataColumn(
+                              label: const Text('NAME'),
+                              onSort: _onSort,
+                            ),
+                            const DataColumn(label: Text('CATEGORY')),
+                            DataColumn(
+                              label: const Text('RATING'),
+                              numeric: true,
+                              onSort: _onSort,
+                            ),
+                            DataColumn(
+                              label: const Text('PRICE/HR'),
+                              numeric: true,
+                              onSort: _onSort,
+                            ),
+                            const DataColumn(label: Text('STATUS')),
+                            const DataColumn(label: Text('ACTIONS')),
+                          ],
+                          rows: _displayData.map((p) {
+                            return DataRow(
+                              cells: [
+                                DataCell(
+                                  Text(
+                                    p.name,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                DataCell(Text(p.category.name)),
+                                DataCell(
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.star,
+                                        color: Colors.amber,
+                                        size: 14,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(p.rating.toString()),
+                                    ],
+                                  ),
+                                ),
+                                DataCell(
+                                  Text(
+                                    '\$${p.pricePerHour.toStringAsFixed(0)}',
+                                  ),
+                                ),
+                                DataCell(
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: p.isOnline
+                                          ? Colors.green.withValues(alpha: 0.1)
+                                          : Colors.white10,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      p.isOnline ? 'ONLINE' : 'OFFLINE',
+                                      style: TextStyle(
+                                        color: p.isOnline
+                                            ? Colors.green
+                                            : Colors.white24,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                DataCell(
+                                  Row(
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(
+                                          LucideIcons.pencil,
+                                          size: 16,
+                                          color: Colors.blueAccent,
+                                        ),
+                                        onPressed: () => _editProvider(p),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          LucideIcons.trash2,
+                                          size: 16,
+                                          color: Colors.redAccent,
+                                        ),
+                                        onPressed: () => _deleteProvider(p),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ),
                     ),
-                    dataTextStyle: const TextStyle(color: Colors.white70),
-                    columns: [
-                      DataColumn(
-                        label: const Text('NAME'),
-                        onSort: _onSort,
+              const SizedBox(height: 24),
+              if (!_isLoading)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _currentPage > 1
+                          ? () {
+                              setState(() {
+                                _currentPage--;
+                              });
+                              _loadData();
+                            }
+                          : null,
+                      icon: const Icon(LucideIcons.chevronLeft, size: 16),
+                      label: const Text('Previous'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber.withValues(alpha: 0.1),
+                        foregroundColor: Colors.amber,
+                        disabledForegroundColor: Colors.white24,
+                        disabledBackgroundColor: Colors.white10,
                       ),
-                      const DataColumn(label: Text('CATEGORY')),
-                      DataColumn(
-                        label: const Text('RATING'),
-                        numeric: true,
-                        onSort: _onSort,
+                    ),
+                    Text(
+                      'Page $_currentPage',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontWeight: FontWeight.bold,
                       ),
-                      DataColumn(
-                        label: const Text('PRICE/HR'),
-                        numeric: true,
-                        onSort: _onSort,
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: _hasNextPage
+                          ? () {
+                              setState(() {
+                                _currentPage++;
+                              });
+                              _loadData();
+                            }
+                          : null,
+                      icon: const Icon(LucideIcons.chevronRight, size: 16),
+                      label: const Text('Next'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber.withValues(alpha: 0.1),
+                        foregroundColor: Colors.amber,
+                        disabledForegroundColor: Colors.white24,
+                        disabledBackgroundColor: Colors.white10,
                       ),
-                      const DataColumn(label: Text('STATUS')),
-                      const DataColumn(label: Text('ACTIONS')),
-                    ],
-                    rows: _displayData.map((p) {
-                      return DataRow(
-                        cells: [
-                          DataCell(Text(p.name,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold))),
-                          DataCell(Text(p.category)),
-                          DataCell(Row(
-                            children: [
-                              const Icon(Icons.star,
-                                  color: Colors.amber, size: 14),
-                              const SizedBox(width: 4),
-                              Text(p.rating.toString()),
-                            ],
-                          )),
-                          DataCell(Text('\$${p.pricePerHour.toStringAsFixed(0)}')),
-                          DataCell(Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: p.isOnline
-                                  ? Colors.green.withValues(alpha: 0.1)
-                                  : Colors.white10,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              p.isOnline ? 'ONLINE' : 'OFFLINE',
-                              style: TextStyle(
-                                color: p.isOnline ? Colors.green : Colors.white24,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          )),
-                          DataCell(Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(LucideIcons.pencil,
-                                    size: 16, color: Colors.blueAccent),
-                                onPressed: () => _editProvider(p),
-                              ),
-                              IconButton(
-                                icon: const Icon(LucideIcons.trash2,
-                                    size: 16, color: Colors.redAccent),
-                                onPressed: () => _deleteProvider(p),
-                              ),
-                            ],
-                          )),
-                        ],
-                      );
-                    }).toList(),
-                  ),
+                    ),
+                  ],
                 ),
-              ),
             ],
           ),
         ),
@@ -304,9 +455,7 @@ class _GlassBox extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: child,
     );

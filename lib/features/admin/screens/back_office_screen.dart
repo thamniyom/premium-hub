@@ -4,12 +4,15 @@ import '../../../core/services/log_service.dart';
 import 'provider_table_screen.dart';
 import 'user_management_table_screen.dart';
 import 'transaction_registry_screen.dart';
+import 'combo_box_table_screen.dart';
+import 'lounge_table_screen.dart';
 
 class BackOfficeScreen extends StatelessWidget {
   const BackOfficeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('BackOfficeScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -57,7 +60,7 @@ class BackOfficeScreen extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               _BackOfficeLink(
                 title: 'User Management Table',
                 subtitle: 'Review customer and provider accounts',
@@ -67,8 +70,39 @@ class BackOfficeScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          const UserManagementTableScreen(),
+                      builder: (context) => const UserManagementTableScreen(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+
+              _BackOfficeLink(
+                title: 'ComboBox Management Table',
+                subtitle: 'Manage categories and configurations',
+                icon: LucideIcons.list,
+                onTap: () {
+                  LogService.screenOpened('ComboBoxTableScreen');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ComboBoxTableScreen(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+
+              _BackOfficeLink(
+                title: 'Lounge Management Table',
+                subtitle: 'Manage premium lounge spaces',
+                icon: LucideIcons.armchair,
+                onTap: () {
+                  LogService.screenOpened('LoungeTableScreen');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LoungeTableScreen(),
                     ),
                   );
                 },
@@ -84,8 +118,7 @@ class BackOfficeScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          const TransactionRegistryScreen(),
+                      builder: (context) => const TransactionRegistryScreen(),
                     ),
                   );
                 },
@@ -176,7 +209,11 @@ class _SystemHealthCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
-          _HealthRow(label: 'Server API', status: 'Online', color: Colors.green),
+          _HealthRow(
+            label: 'Server API',
+            status: 'Online',
+            color: Colors.green,
+          ),
           const Divider(color: Colors.white10, height: 24),
           _HealthRow(label: 'Database', status: 'Healthy', color: Colors.green),
           const Divider(color: Colors.white10, height: 24),
@@ -231,10 +268,7 @@ class _GlassBox extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
 
-  const _GlassBox({
-    required this.child,
-    this.padding = EdgeInsets.zero,
-  });
+  const _GlassBox({required this.child, this.padding = EdgeInsets.zero});
 
   @override
   Widget build(BuildContext context) {
@@ -247,10 +281,7 @@ class _GlassBox extends StatelessWidget {
           width: 1,
         ),
       ),
-      child: Padding(
-        padding: padding,
-        child: child,
-      ),
+      child: Padding(padding: padding, child: child),
     );
   }
 }

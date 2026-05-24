@@ -2,6 +2,7 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:premium_hub/core/services/log_service.dart';
 import 'package:premium_hub/main.dart';
 import 'package:provider/provider.dart';
 import '../../../core/widgets/glass_card.dart';
@@ -13,6 +14,7 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('ProfileScreen');
     return Container(
       color: Colors.black,
       child: SafeArea(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../models/app_user.dart';
+import '../models/service_member.dart';
+import '../services/member_service.dart';
 import '../../../core/services/log_service.dart';
 
 class UserAddScreen extends StatefulWidget {
@@ -12,6 +14,8 @@ class UserAddScreen extends StatefulWidget {
 
 class _UserAddScreenState extends State<UserAddScreen> {
   final _formKey = GlobalKey<FormState>();
+  final MemberService _memberService = MemberService();
+  bool _isSaving = false;
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _avatarUrlController = TextEditingController(
@@ -29,25 +33,57 @@ class _UserAddScreenState extends State<UserAddScreen> {
     super.dispose();
   }
 
-  void _saveUser() {
+  Future<void> _saveUser() async {
     if (_formKey.currentState!.validate()) {
-      final newUser = AppUser(
-        id: 'u-${DateTime.now().millisecondsSinceEpoch}',
-        name: _nameController.text.trim(),
+      setState(() => _isSaving = true);
+
+      final member = ServiceMember(
+        username: _nameController.text.trim(),
         email: _emailController.text.trim(),
-        avatarUrl: _avatarUrlController.text.trim(),
-        role: _selectedRole,
-        status: _selectedStatus,
-        joinedAt: DateTime.now(),
+        blocked: _selectedStatus == UserStatus.suspended,
+        confirmed: _selectedStatus != UserStatus.pending,
+        role: 3, //_selectedRole.name,
       );
 
-      LogService.info('Creating new user: ${newUser.id}');
-      Navigator.pop(context, newUser);
+      try {
+        LogService.info('Creating new user via API');
+        // Strapi requires a password for user creation via POST /api/users
+        final createdMember = await _memberService.createMember(
+          member,
+          'Password123!',
+        );
+
+        // final newUser = AppUser(
+        //   id: createdMember.documentId ?? createdMember.id?.toString() ?? '',
+        //   name: createdMember.username,
+        //   email: createdMember.email,
+        //   avatarUrl: _avatarUrlController.text.trim(),
+        //   role: _selectedRole,
+        //   status: _selectedStatus,
+        //   joinedAt: DateTime.now(),
+        // );
+
+        if (mounted) {
+          Navigator.pop(context, createdMember);
+        }
+      } catch (e) {
+        LogService.error('Failed to create user: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to create user: $e')));
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isSaving = false);
+        }
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('UserAddScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -157,7 +193,7 @@ class _UserAddScreenState extends State<UserAddScreen> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: _saveUser,
+                    onPressed: _isSaving ? null : _saveUser,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.amber,
                       foregroundColor: Colors.black,
@@ -166,13 +202,22 @@ class _UserAddScreenState extends State<UserAddScreen> {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
-                      'Create User',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: _isSaving
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.black,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            'Create User',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ],

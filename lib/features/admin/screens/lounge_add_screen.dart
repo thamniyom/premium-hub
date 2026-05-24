@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:premium_hub/features/admin/models/combo_box.dart';
 import '../../../core/services/log_service.dart';
 import '../../services/models/lounge.dart';
+import '../services/combo_box_service.dart';
 
 class LoungeAddScreen extends StatefulWidget {
   const LoungeAddScreen({super.key});
@@ -12,20 +14,48 @@ class LoungeAddScreen extends StatefulWidget {
 
 class _LoungeAddScreenState extends State<LoungeAddScreen> {
   final _formKey = GlobalKey<FormState>();
+  final ComboBoxService _comboBoxService = ComboBoxService();
+  List<ComboBox> _categories = [];
+  ComboBox? _selectedCategory;
+  bool _isLoadingCategories = true;
+
   final _nameController = TextEditingController();
-  final _categoryController = TextEditingController();
   final _priceController = TextEditingController();
   final _imageUrlController = TextEditingController(
-      text:
-          'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=2600&auto=format&fit=crop');
+    text:
+        'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=2600&auto=format&fit=crop',
+  );
   final _descriptionController = TextEditingController();
 
   bool _isOpen = false;
 
   @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final cats = await _comboBoxService.getLoungeCategories();
+      setState(() {
+        _categories = cats;
+        _isLoadingCategories = false;
+        if (_categories.isNotEmpty) {
+          _selectedCategory = _categories.first;
+        }
+      });
+    } catch (e) {
+      LogService.error('Failed to load categories: $e');
+      setState(() {
+        _isLoadingCategories = false;
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
-    _categoryController.dispose();
     _priceController.dispose();
     _imageUrlController.dispose();
     _descriptionController.dispose();
@@ -33,16 +63,23 @@ class _LoungeAddScreenState extends State<LoungeAddScreen> {
   }
 
   void _saveLounge() {
+    if (_selectedCategory == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select a category')));
+      return;
+    }
+
     if (_formKey.currentState!.validate()) {
       final newLounge = Lounge(
         id: 'l-${DateTime.now().millisecondsSinceEpoch}',
         name: _nameController.text.trim(),
-        category: _categoryController.text.trim(),
+        category: _selectedCategory!,
         imageUrl: _imageUrlController.text.trim(),
         rating: 5.0,
         reviewCount: 0,
         description: _descriptionController.text.trim(),
-        pricePerEntry: double.parse(_priceController.text.trim()),
+        pricePerHour: double.parse(_priceController.text.trim()),
         isOpen: _isOpen,
         amenities: const [],
       );
@@ -54,6 +91,7 @@ class _LoungeAddScreenState extends State<LoungeAddScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('LoungeAddScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -81,7 +119,8 @@ class _LoungeAddScreenState extends State<LoungeAddScreen> {
                       color: Colors.amber.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                          color: Colors.amber.withValues(alpha: 0.3)),
+                        color: Colors.amber.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
@@ -94,8 +133,11 @@ class _LoungeAddScreenState extends State<LoungeAddScreen> {
                           width: 120,
                           height: 80,
                           color: Colors.white10,
-                          child: const Icon(LucideIcons.image,
-                              size: 40, color: Colors.amber),
+                          child: const Icon(
+                            LucideIcons.image,
+                            size: 40,
+                            color: Colors.amber,
+                          ),
                         ),
                       ),
                     ),
@@ -113,12 +155,21 @@ class _LoungeAddScreenState extends State<LoungeAddScreen> {
                 const SizedBox(height: 20),
 
                 _LabelText('Category'),
-                _GlassInput(
-                  controller: _categoryController,
-                  hint: 'e.g. VIP Lounge, Rooftop Lounge...',
-                  validator: (v) =>
-                      v == null || v.isEmpty ? 'Category is required' : null,
-                ),
+                if (_isLoadingCategories)
+                  const Center(
+                    child: CircularProgressIndicator(color: Colors.amber),
+                  )
+                else
+                  _GlassDropdown(
+                    value: _selectedCategory,
+                    items: _categories,
+                    hint: 'Select Category',
+                    onChanged: (ComboBox? value) {
+                      setState(() {
+                        _selectedCategory = value;
+                      });
+                    },
+                  ),
                 const SizedBox(height: 20),
 
                 _LabelText('Entry Fee (\$)'),
@@ -157,10 +208,13 @@ class _LoungeAddScreenState extends State<LoungeAddScreen> {
                     color: Colors.white.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.1)),
+                      color: Colors.white.withValues(alpha: 0.1),
+                    ),
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 4,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -176,8 +230,7 @@ class _LoungeAddScreenState extends State<LoungeAddScreen> {
                         value: _isOpen,
                         onChanged: (v) => setState(() => _isOpen = v),
                         activeThumbColor: Colors.amber,
-                        activeTrackColor:
-                            Colors.amber.withValues(alpha: 0.3),
+                        activeTrackColor: Colors.amber.withValues(alpha: 0.3),
                         inactiveThumbColor: Colors.white24,
                         inactiveTrackColor: Colors.white10,
                       ),
@@ -211,6 +264,52 @@ class _LoungeAddScreenState extends State<LoungeAddScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GlassDropdown extends StatelessWidget {
+  final ComboBox? value;
+  final List<ComboBox> items;
+  final String hint;
+  final void Function(ComboBox?) onChanged;
+
+  const _GlassDropdown({
+    required this.value,
+    required this.items,
+    required this.hint,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<ComboBox>(
+          value: value,
+          isExpanded: true,
+          dropdownColor: const Color(0xFF2A2A2A),
+          hint: Text(
+            hint,
+            style: const TextStyle(color: Colors.white24, fontSize: 14),
+          ),
+          icon: const Icon(LucideIcons.chevronDown, color: Colors.white54),
+          style: const TextStyle(color: Colors.white),
+          items: items.map((ComboBox item) {
+            return DropdownMenuItem<ComboBox>(
+              value: item,
+              child: Text(item.name),
+            );
+          }).toList(),
+          onChanged: onChanged,
         ),
       ),
     );
@@ -260,9 +359,7 @@ class _GlassInput extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: TextFormField(
         controller: controller,
@@ -274,8 +371,10 @@ class _GlassInput extends StatelessWidget {
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: const TextStyle(color: Colors.white24, fontSize: 14),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ),
           border: InputBorder.none,
         ),
       ),

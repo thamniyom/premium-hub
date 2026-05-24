@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:premium_hub/core/services/log_service.dart';
-import '../../services/models/service_provider.dart';
+import 'package:premium_hub/features/services/models/provider.dart';
 import '../../bookings/models/booking.dart';
 
-class ProviderServiceHistoryScreen extends StatelessWidget {
-  final ServiceProvider provider;
+class ProviderHistoryScreen extends StatelessWidget {
+  final Provider provider;
 
-  const ProviderServiceHistoryScreen({super.key, required this.provider});
+  const ProviderHistoryScreen({super.key, required this.provider});
 
   @override
   Widget build(BuildContext context) {
-    LogService.screenLoad('ProviderServiceHistoryScreen');
+    LogService.screenLoad('ProviderHistoryScreen');
     // Filter bookings for this specific provider
     final history = demoBookings
         .where((b) => b.providerName == provider.name)

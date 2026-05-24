@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:premium_hub/core/services/log_service.dart';
+import 'package:premium_hub/features/services/models/provider.dart';
 import '../../../core/widgets/glass_card.dart';
-import '../models/service_provider.dart';
-import 'service_detail_screen.dart';
+import 'provider_detail_screen.dart';
 
 class ServiceListScreen extends StatefulWidget {
   final String category;
@@ -14,7 +15,7 @@ class ServiceListScreen extends StatefulWidget {
 }
 
 class _ServiceListScreenState extends State<ServiceListScreen> {
-  late List<ServiceProvider> filteredProviders;
+  late List<Provider> filteredProviders;
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -28,15 +29,18 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
   void _filterProviders(String query) {
     setState(() {
       filteredProviders = demoProviders
-          .where((p) =>
-              p.category == widget.category &&
-              p.name.toLowerCase().contains(query.toLowerCase()))
+          .where(
+            (p) =>
+                p.category == widget.category &&
+                p.name.toLowerCase().contains(query.toLowerCase()),
+          )
           .toList();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('ServiceListScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -75,7 +79,6 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
               ),
             ),
           ),
-
           // Results Count
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -89,7 +92,6 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
             ),
           ),
           const SizedBox(height: 16),
-
           // Provider List
           Expanded(
             child: ListView.builder(
@@ -105,7 +107,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              ServiceDetailScreen(provider: provider),
+                              ProviderDetailScreen(provider: provider),
                         ),
                       );
                     },
@@ -117,7 +119,9 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                             children: [
                               CircleAvatar(
                                 radius: 40,
-                                backgroundImage: NetworkImage(provider.imageUrl),
+                                backgroundImage: NetworkImage(
+                                  provider.imageUrl,
+                                ),
                               ),
                               if (provider.isOnline)
                                 Positioned(
@@ -130,7 +134,9 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                                       color: Colors.green,
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                          color: Colors.black, width: 2),
+                                        color: Colors.black,
+                                        width: 2,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -165,13 +171,18 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                                 const SizedBox(height: 4),
                                 Row(
                                   children: [
-                                    const Icon(Icons.star,
-                                        color: Colors.amber, size: 16),
+                                    const Icon(
+                                      Icons.star,
+                                      color: Colors.amber,
+                                      size: 16,
+                                    ),
                                     const SizedBox(width: 4),
                                     Text(
                                       '${provider.rating} (${provider.reviewCount} reviews)',
                                       style: const TextStyle(
-                                          color: Colors.white54, fontSize: 13),
+                                        color: Colors.white54,
+                                        fontSize: 13,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -181,7 +192,9 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
-                                      color: Colors.white70, fontSize: 12),
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                  ),
                                 ),
                               ],
                             ),

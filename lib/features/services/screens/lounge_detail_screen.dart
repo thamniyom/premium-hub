@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:premium_hub/core/services/log_service.dart';
+import 'package:premium_hub/features/services/models/lounge.dart';
 import '../../messages/models/conversation.dart';
 import '../../messages/screens/chat_screen.dart';
 import '../../bookings/screens/booking_form_screen.dart';
-import '../models/service_provider.dart';
 
-class ServiceDetailScreen extends StatelessWidget {
-  final ServiceProvider provider;
+class LoungeDetailScreen extends StatelessWidget {
+  final Lounge lounge;
 
-  const ServiceDetailScreen({super.key, required this.provider});
+  const LoungeDetailScreen({super.key, required this.lounge});
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('LoungeDetailScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       body: CustomScrollView(
@@ -40,7 +42,10 @@ class ServiceDetailScreen extends StatelessWidget {
                     color: Colors.black.withValues(alpha: 0.4),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(LucideIcons.messageSquare, color: Colors.amber),
+                  child: const Icon(
+                    LucideIcons.messageSquare,
+                    color: Colors.amber,
+                  ),
                 ),
                 onPressed: () {
                   Navigator.push(
@@ -48,9 +53,9 @@ class ServiceDetailScreen extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (context) => ChatScreen(
                         conversation: Conversation(
-                          id: provider.id,
-                          otherParticipantName: provider.name,
-                          otherParticipantAvatar: provider.imageUrl,
+                          id: lounge.id,
+                          otherParticipantName: lounge.name,
+                          otherParticipantAvatar: lounge.imageUrl,
                           lastMessage: 'Hi! I am interested in your service.',
                           lastMessageTime: DateTime.now(),
                           isOnline: true,
@@ -64,23 +69,17 @@ class ServiceDetailScreen extends StatelessWidget {
             ],
             flexibleSpace: FlexibleSpaceBar(
               background: Hero(
-                tag: 'provider-${provider.id}',
+                tag: 'lounge-${lounge.id}',
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.network(
-                      provider.imageUrl,
-                      fit: BoxFit.cover,
-                    ),
+                    Image.network(lounge.imageUrl, fit: BoxFit.cover),
                     const DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Colors.black,
-                          ],
+                          colors: [Colors.transparent, Colors.black],
                         ),
                       ),
                     ),
@@ -104,15 +103,16 @@ class ServiceDetailScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            provider.name,
-                            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                            lounge.name,
+                            style: Theme.of(context).textTheme.displaySmall
+                                ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            provider.category,
+                            lounge.category.name,
                             style: const TextStyle(
                               fontSize: 16,
                               color: Colors.amber,
@@ -125,7 +125,7 @@ class ServiceDetailScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            '\$${provider.pricePerHour.toInt()}',
+                            '\$${lounge.pricePerHour.toInt()}',
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -152,12 +152,12 @@ class ServiceDetailScreen extends StatelessWidget {
                       _DetailStat(
                         icon: Icons.star,
                         label: 'Rating',
-                        value: provider.rating.toString(),
+                        value: lounge.rating.toString(),
                       ),
                       _DetailStat(
                         icon: LucideIcons.users,
                         label: 'Reviews',
-                        value: '${provider.reviewCount}+',
+                        value: '${lounge.reviewCount}+',
                       ),
                       _DetailStat(
                         icon: LucideIcons.clock,
@@ -179,7 +179,7 @@ class ServiceDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    provider.description,
+                    lounge.description,
                     style: const TextStyle(
                       fontSize: 16,
                       color: Colors.white70,
@@ -229,7 +229,7 @@ class ServiceDetailScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => BookingFormScreen(provider: provider),
+                  builder: (context) => BookingFormScreen(lounge: lounge),
                 ),
               );
             },
@@ -242,10 +242,7 @@ class ServiceDetailScreen extends StatelessWidget {
             ),
             child: const Text(
               'Book Now',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
         ),
@@ -282,10 +279,7 @@ class _DetailStat extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.white54,
-          ),
+          style: const TextStyle(fontSize: 12, color: Colors.white54),
         ),
       ],
     );
@@ -313,10 +307,7 @@ class _ReviewTile extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            CircleAvatar(
-              radius: 24,
-              backgroundImage: NetworkImage(imageUrl),
-            ),
+            CircleAvatar(radius: 24, backgroundImage: NetworkImage(imageUrl)),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -340,7 +331,9 @@ class _ReviewTile extends StatelessWidget {
                           Text(
                             rating.toString(),
                             style: const TextStyle(
-                                color: Colors.white70, fontSize: 13),
+                              color: Colors.white70,
+                              fontSize: 13,
+                            ),
                           ),
                         ],
                       ),
@@ -349,10 +342,7 @@ class _ReviewTile extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     review,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.white54,
-                    ),
+                    style: const TextStyle(fontSize: 14, color: Colors.white54),
                   ),
                 ],
               ),
@@ -367,14 +357,21 @@ class _ReviewTile extends StatelessWidget {
 class _GlassBox extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
-  const _GlassBox({required this.child, this.padding = const EdgeInsets.all(16)});
+
+  const _GlassBox({
+    required this.child,
+    this.padding = const EdgeInsets.all(16),
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.2),
+          width: 1,
+        ),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

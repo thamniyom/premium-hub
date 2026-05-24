@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
+import 'package:premium_hub/core/services/log_service.dart';
 import '../../bookings/models/booking.dart';
 import 'booking_add_screen.dart';
 
@@ -8,7 +9,8 @@ class BookingManagementScreen extends StatefulWidget {
   const BookingManagementScreen({super.key});
 
   @override
-  State<BookingManagementScreen> createState() => _BookingManagementScreenState();
+  State<BookingManagementScreen> createState() =>
+      _BookingManagementScreenState();
 }
 
 class _BookingManagementScreenState extends State<BookingManagementScreen>
@@ -45,15 +47,15 @@ class _BookingManagementScreenState extends State<BookingManagementScreen>
       _filteredBookings = _allBookings.where((booking) {
         final matchesQuery =
             booking.providerName.toLowerCase().contains(query.toLowerCase()) ||
-                booking.serviceType.toLowerCase().contains(query.toLowerCase());
+            booking.serviceType.toLowerCase().contains(query.toLowerCase());
 
         bool matchesTab = true;
         if (_tabController.index == 1) {
-          matchesTab = booking.status == BookingStatus.upcoming;
+          matchesTab = booking.statusBooking == BookingStatus.upcoming;
         } else if (_tabController.index == 2) {
-          matchesTab = booking.status == BookingStatus.completed;
+          matchesTab = booking.statusBooking == BookingStatus.completed;
         } else if (_tabController.index == 3) {
-          matchesTab = booking.status == BookingStatus.cancelled;
+          matchesTab = booking.statusBooking == BookingStatus.cancelled;
         }
 
         return matchesQuery && matchesTab;
@@ -73,7 +75,7 @@ class _BookingManagementScreenState extends State<BookingManagementScreen>
           dateTime: b.dateTime,
           price: b.price,
           imageUrl: b.imageUrl,
-          status: newStatus,
+          statusBooking: newStatus,
         );
         _applyFilters(_searchController.text);
       }
@@ -104,6 +106,7 @@ class _BookingManagementScreenState extends State<BookingManagementScreen>
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('BookingManagementScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -150,7 +153,11 @@ class _BookingManagementScreenState extends State<BookingManagementScreen>
                   decoration: const InputDecoration(
                     hintText: 'Search provider or service...',
                     hintStyle: TextStyle(color: Colors.white24),
-                    icon: Icon(LucideIcons.search, color: Colors.amber, size: 20),
+                    icon: Icon(
+                      LucideIcons.search,
+                      color: Colors.amber,
+                      size: 20,
+                    ),
                     border: InputBorder.none,
                   ),
                 ),
@@ -164,8 +171,11 @@ class _BookingManagementScreenState extends State<BookingManagementScreen>
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(LucideIcons.calendarX,
-                              size: 48, color: Colors.white10),
+                          Icon(
+                            LucideIcons.calendarX,
+                            size: 48,
+                            color: Colors.white10,
+                          ),
                           const SizedBox(height: 16),
                           const Text(
                             'No bookings found',
@@ -198,10 +208,7 @@ class _BookingItem extends StatelessWidget {
   final Booking booking;
   final Function(BookingStatus) onStatusChanged;
 
-  const _BookingItem({
-    required this.booking,
-    required this.onStatusChanged,
-  });
+  const _BookingItem({required this.booking, required this.onStatusChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -209,7 +216,7 @@ class _BookingItem extends StatelessWidget {
     final timeStr = DateFormat('hh:mm a').format(booking.dateTime);
 
     Color statusColor;
-    switch (booking.status) {
+    switch (booking.statusBooking) {
       case BookingStatus.upcoming:
         statusColor = Colors.orange;
         break;
@@ -219,6 +226,11 @@ class _BookingItem extends StatelessWidget {
       case BookingStatus.cancelled:
         statusColor = Colors.red;
         break;
+      case BookingStatus.pending:
+        statusColor = Colors.yellow;
+        break;
+      case BookingStatus.confirmed:
+        statusColor = Colors.blue;
     }
 
     return Padding(
@@ -257,8 +269,10 @@ class _BookingItem extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -267,7 +281,7 @@ class _BookingItem extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    booking.status.name.toUpperCase(),
+                    booking.statusBooking.name.toUpperCase(),
                     style: TextStyle(
                       color: statusColor,
                       fontSize: 10,
@@ -286,12 +300,18 @@ class _BookingItem extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(LucideIcons.calendar,
-                        size: 14, color: Colors.white38),
+                    const Icon(
+                      LucideIcons.calendar,
+                      size: 14,
+                      color: Colors.white38,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       '$dateStr • $timeStr',
-                      style: const TextStyle(color: Colors.white38, fontSize: 12),
+                      style: const TextStyle(
+                        color: Colors.white38,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
@@ -305,7 +325,7 @@ class _BookingItem extends StatelessWidget {
                 ),
               ],
             ),
-            if (booking.status == BookingStatus.upcoming) ...[
+            if (booking.statusBooking == BookingStatus.upcoming) ...[
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -359,10 +379,7 @@ class _ActionBtn extends StatelessWidget {
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: color.withValues(alpha: 0.2),
-            width: 1,
-          ),
+          border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -411,10 +428,7 @@ class _GlassBox extends StatelessWidget {
           ],
         ),
       ),
-      child: Padding(
-        padding: padding,
-        child: child,
-      ),
+      child: Padding(padding: padding, child: child),
     );
   }
 }

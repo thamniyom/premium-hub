@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
+import 'package:premium_hub/core/services/log_service.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../models/booking.dart';
+import '../services/booking_service.dart';
 import 'booking_detail_screen.dart';
 
 class BookingListScreen extends StatefulWidget {
@@ -15,11 +17,36 @@ class BookingListScreen extends StatefulWidget {
 class _BookingListScreenState extends State<BookingListScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  List<Booking> _bookings = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _fetchBookings();
+  }
+
+  Future<void> _fetchBookings() async {
+    try {
+      final bookings = await BookingService().getBookings();
+      if (mounted) {
+        setState(() {
+          _bookings = bookings;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      LogService.error('Error fetching bookings: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to load bookings')));
+      }
+    }
   }
 
   @override
@@ -80,21 +107,33 @@ class _BookingListScreenState extends State<BookingListScreen>
 
             // Tab Bar View
             Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _BookingListView(
-                    bookings: demoBookings
-                        .where((b) => b.status == BookingStatus.upcoming)
-                        .toList(),
-                  ),
-                  _BookingListView(
-                    bookings: demoBookings
-                        .where((b) => b.status != BookingStatus.upcoming)
-                        .toList(),
-                  ),
-                ],
-              ),
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(color: Colors.amber),
+                    )
+                  : TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _BookingListView(
+                          bookings: _bookings
+                              .where(
+                                (b) =>
+                                    b.statusBooking == BookingStatus.upcoming ||
+                                    b.statusBooking == BookingStatus.pending,
+                              )
+                              .toList(),
+                        ),
+                        _BookingListView(
+                          bookings: _bookings
+                              .where(
+                                (b) =>
+                                    b.statusBooking != BookingStatus.upcoming &&
+                                    b.statusBooking != BookingStatus.pending,
+                              )
+                              .toList(),
+                        ),
+                      ],
+                    ),
             ),
           ],
         ),
@@ -110,6 +149,7 @@ class _BookingListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('BookingListScreen');
     if (bookings.isEmpty) {
       return Center(
         child: Column(
@@ -167,7 +207,7 @@ class _BookingListView extends StatelessWidget {
                                 color: Colors.white,
                               ),
                             ),
-                            _StatusBadge(status: booking.status),
+                            _StatusBadge(statusBooking: booking.statusBooking),
                           ],
                         ),
                         const SizedBox(height: 4),
@@ -227,16 +267,17 @@ class _BookingListView extends StatelessWidget {
 }
 
 class _StatusBadge extends StatelessWidget {
-  final BookingStatus status;
+  final BookingStatus statusBooking;
 
-  const _StatusBadge({required this.status});
+  const _StatusBadge({required this.statusBooking});
 
   @override
   Widget build(BuildContext context) {
     Color color;
     String text;
 
-    switch (status) {
+    switch (statusBooking) {
+      case BookingStatus.pending:
       case BookingStatus.upcoming:
         color = Colors.blueAccent;
         text = 'Upcoming';
@@ -248,6 +289,10 @@ class _StatusBadge extends StatelessWidget {
       case BookingStatus.cancelled:
         color = Colors.redAccent;
         text = 'Cancelled';
+        break;
+      case BookingStatus.confirmed:
+        color = Colors.blue;
+        text = 'Confirmed';
         break;
     }
 

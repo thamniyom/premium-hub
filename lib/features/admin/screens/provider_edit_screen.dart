@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:premium_hub/features/services/models/provider.dart';
 import '../../../core/services/log_service.dart';
-import '../../services/models/service_provider.dart';
+import '../models/combo_box.dart';
+import '../services/combo_box_service.dart';
+import '../services/provider_service.dart';
 
 class ProviderEditScreen extends StatefulWidget {
-  final ServiceProvider provider;
+  final Provider provider;
 
   const ProviderEditScreen({super.key, required this.provider});
 
@@ -14,8 +17,15 @@ class ProviderEditScreen extends StatefulWidget {
 
 class _ProviderEditScreenState extends State<ProviderEditScreen> {
   final _formKey = GlobalKey<FormState>();
+  final ProviderService _service = ProviderService();
+  final ComboBoxService _comboBoxService = ComboBoxService();
+
+  List<ComboBox> _categories = [];
+  ComboBox? _selectedCategory;
+  bool _isLoadingCategories = true;
+  bool _isSaving = false;
+
   late TextEditingController _nameController;
-  late TextEditingController _categoryController;
   late TextEditingController _priceController;
   late TextEditingController _imageUrlController;
   late TextEditingController _descriptionController;
@@ -23,31 +33,78 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
   @override
   void initState() {
     super.initState();
+    _loadCategories();
     _nameController = TextEditingController(text: widget.provider.name);
-    _categoryController = TextEditingController(text: widget.provider.category);
-    _priceController =
-        TextEditingController(text: widget.provider.pricePerHour.toString());
+    _priceController = TextEditingController(
+      text: widget.provider.pricePerHour.toString(),
+    );
     _imageUrlController = TextEditingController(text: widget.provider.imageUrl);
-    _descriptionController =
-        TextEditingController(text: widget.provider.description);
+    _descriptionController = TextEditingController(
+      text: widget.provider.description,
+    );
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final cats = await _comboBoxService.getLoungeCategories();
+      setState(() {
+        _categories = cats;
+        _isLoadingCategories = false;
+
+        try {
+          if (widget.provider.category.documentId != null) {
+            _selectedCategory = _categories.firstWhere(
+              (c) => c.documentId == widget.provider.category.documentId,
+            );
+          } else {
+            _selectedCategory = _categories.firstWhere(
+              (c) => c.name == widget.provider.category.name,
+            );
+          }
+        } catch (_) {
+          if (widget.provider.category.name.isNotEmpty) {
+            _categories.insert(0, widget.provider.category);
+            _selectedCategory = widget.provider.category;
+          } else if (_categories.isNotEmpty) {
+            _selectedCategory = _categories.first;
+          }
+        }
+      });
+    } catch (e) {
+      LogService.error('Failed to load categories: $e');
+      setState(() {
+        _isLoadingCategories = false;
+      });
+    }
   }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _categoryController.dispose();
     _priceController.dispose();
     _imageUrlController.dispose();
     _descriptionController.dispose();
     super.dispose();
   }
 
-  void _saveChanges() {
+  Future<void> _saveChanges() async {
+    if (_selectedCategory == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select a category')));
+      return;
+    }
+
     if (_formKey.currentState!.validate()) {
-      final updatedProvider = ServiceProvider(
+      setState(() {
+        _isSaving = true;
+      });
+
+      final updatedProvider = Provider(
         id: widget.provider.id,
+        documentId: widget.provider.documentId,
         name: _nameController.text,
-        category: _categoryController.text,
+        category: _selectedCategory!,
         imageUrl: _imageUrlController.text,
         rating: widget.provider.rating,
         reviewCount: widget.provider.reviewCount,
@@ -56,8 +113,33 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
         isOnline: widget.provider.isOnline,
       );
 
-      LogService.info('Saving changes for provider: ${updatedProvider.id}');
-      Navigator.pop(context, updatedProvider);
+      try {
+        LogService.info('Saving changes for provider: ${updatedProvider.id}');
+        if (updatedProvider.documentId != null) {
+          await _service.updateProvider(
+            updatedProvider.documentId!,
+            updatedProvider,
+          );
+        } else {
+          await _service.createProvider(updatedProvider);
+        }
+        if (mounted) {
+          Navigator.pop(context, updatedProvider);
+        }
+      } catch (e) {
+        LogService.error('Failed to save provider: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to save: $e')));
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isSaving = false;
+          });
+        }
+      }
     }
   }
 
@@ -101,8 +183,11 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
                             color: Colors.amber,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(LucideIcons.camera,
-                              size: 16, color: Colors.black),
+                          child: const Icon(
+                            LucideIcons.camera,
+                            size: 16,
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                     ],
@@ -119,11 +204,21 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
                 const SizedBox(height: 20),
 
                 _LabelText('Category'),
-                _GlassInput(
-                  controller: _categoryController,
-                  hint: 'e.g. Booking, Payment, Salon',
-                  validator: (v) => v!.isEmpty ? 'Category is required' : null,
-                ),
+                if (_isLoadingCategories)
+                  const Center(
+                    child: CircularProgressIndicator(color: Colors.amber),
+                  )
+                else
+                  _GlassDropdown(
+                    value: _selectedCategory,
+                    items: _categories,
+                    hint: 'Select Category',
+                    onChanged: (ComboBox? value) {
+                      setState(() {
+                        _selectedCategory = value;
+                      });
+                    },
+                  ),
                 const SizedBox(height: 20),
 
                 _LabelText('Price Per Hour (\$)'),
@@ -150,7 +245,8 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
                   controller: _descriptionController,
                   hint: 'Tell us about the provider...',
                   maxLines: 4,
-                  validator: (v) => v!.isEmpty ? 'Description is required' : null,
+                  validator: (v) =>
+                      v!.isEmpty ? 'Description is required' : null,
                 ),
                 const SizedBox(height: 40),
 
@@ -159,7 +255,7 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: _saveChanges,
+                    onPressed: _isSaving ? null : _saveChanges,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.amber,
                       foregroundColor: Colors.black,
@@ -168,13 +264,22 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
-                      'Save Changes',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: _isSaving
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.black,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            'Save Changes',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ],
@@ -206,6 +311,52 @@ class _LabelText extends StatelessWidget {
   }
 }
 
+class _GlassDropdown extends StatelessWidget {
+  final ComboBox? value;
+  final List<ComboBox> items;
+  final String hint;
+  final void Function(ComboBox?) onChanged;
+
+  const _GlassDropdown({
+    required this.value,
+    required this.items,
+    required this.hint,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<ComboBox>(
+          value: value,
+          isExpanded: true,
+          dropdownColor: const Color(0xFF2A2A2A),
+          hint: Text(
+            hint,
+            style: const TextStyle(color: Colors.white24, fontSize: 14),
+          ),
+          icon: const Icon(LucideIcons.chevronDown, color: Colors.white54),
+          style: const TextStyle(color: Colors.white),
+          items: items.map((ComboBox item) {
+            return DropdownMenuItem<ComboBox>(
+              value: item,
+              child: Text(item.name),
+            );
+          }).toList(),
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+}
+
 class _GlassInput extends StatelessWidget {
   final TextEditingController controller;
   final String hint;
@@ -229,9 +380,7 @@ class _GlassInput extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: TextFormField(
         controller: controller,
@@ -243,8 +392,10 @@ class _GlassInput extends StatelessWidget {
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: const TextStyle(color: Colors.white24, fontSize: 14),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ),
           border: InputBorder.none,
         ),
       ),
