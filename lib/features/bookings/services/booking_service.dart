@@ -7,7 +7,7 @@ import '../models/booking.dart';
 class BookingService {
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://localhost:1337/api',
+    defaultValue: 'https://timely-virtue-25369000ea.strapiapp.com/api',
   );
   Future<Map<String, String>> _getHeaders() async {
     final prefs = await SharedPreferences.getInstance();

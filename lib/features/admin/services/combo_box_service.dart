@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ComboBoxService {
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://localhost:1337/api',
+    defaultValue: 'https://timely-virtue-25369000ea.strapiapp.com/api',
   );
   static const String baseUrlPrd = 'http://localhost:1337/api';
   static const String baseUrlDev = 'http://localhost:1337/api';

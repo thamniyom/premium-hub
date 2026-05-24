@@ -6,7 +6,7 @@ import '../models/service_member.dart';
 class MemberService {
   final String baseUrl = const String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://localhost:1337/api',
+    defaultValue: 'https://timely-virtue-25369000ea.strapiapp.com/api',
   );
   //https://timely-virtue-25369000ea.strapiapp.com.xxx/api
   static String? jwt;
