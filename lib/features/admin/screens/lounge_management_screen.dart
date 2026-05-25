@@ -120,6 +120,7 @@ class _LoungeManagementScreenState extends State<LoungeManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('LoungeManagementScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(

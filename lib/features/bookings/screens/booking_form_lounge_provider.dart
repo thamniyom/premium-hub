@@ -6,6 +6,7 @@ import 'package:premium_hub/features/admin/models/combo_box.dart';
 import 'package:premium_hub/features/services/models/provider.dart';
 import 'package:premium_hub/features/services/models/lounge.dart';
 import 'package:premium_hub/features/bookings/screens/booking_form_screen.dart';
+import '../../../core/services/log_service.dart';
 import '../../../core/widgets/glass_card.dart';
 
 class BookingFormLoungeProviderScreen extends StatefulWidget {
@@ -260,6 +261,7 @@ class _BookingFormLoungeProviderScreenState
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('BookingFormLoungeProviderScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(

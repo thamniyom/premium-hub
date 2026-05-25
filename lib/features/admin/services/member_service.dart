@@ -27,6 +27,7 @@ class MemberService {
     String identifier,
     String password,
   ) async {
+    LogService.info('baseUrl: $baseUrl');
     LogService.info('Authenticating member: $identifier');
     final response = await http.post(
       Uri.parse('$baseUrl/auth/local'),

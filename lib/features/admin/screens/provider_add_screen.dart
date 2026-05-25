@@ -114,6 +114,7 @@ class _ProviderAddScreenState extends State<ProviderAddScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('ProviderAddScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(

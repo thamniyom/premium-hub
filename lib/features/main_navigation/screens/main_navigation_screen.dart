@@ -28,6 +28,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('MainNavigationScreen');
     final appState = Provider.of<AppState>(context);
     final currentIndex = appState.navigationIndex;
 

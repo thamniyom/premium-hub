@@ -145,6 +145,7 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('ProviderEditScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(

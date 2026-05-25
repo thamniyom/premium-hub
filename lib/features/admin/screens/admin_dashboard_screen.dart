@@ -12,6 +12,7 @@ class AdminDashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('AdminDashboardScreen');
     // Simulated Management Data
     const double totalRevenue = 1240.0;
     const int totalBookings = 42;

@@ -211,6 +211,7 @@ class _LoungeTableScreenState extends State<LoungeTableScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('LoungeTableScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(

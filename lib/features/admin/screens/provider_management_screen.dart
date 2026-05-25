@@ -165,6 +165,7 @@ class _ProviderManagementScreenState extends State<ProviderManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LogService.screenLoad('ProviderManagementScreen');
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
