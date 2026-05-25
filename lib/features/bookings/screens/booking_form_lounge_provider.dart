@@ -1,8 +1,8 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:premium_hub/features/admin/models/combo_box.dart';
+import 'package:premium_hub/features/admin/services/lounge_service.dart';
+import 'package:premium_hub/features/admin/services/provider_service.dart';
 import 'package:premium_hub/features/services/models/provider.dart';
 import 'package:premium_hub/features/services/models/lounge.dart';
 import 'package:premium_hub/features/bookings/screens/booking_form_screen.dart';
@@ -20,75 +20,76 @@ class BookingFormLoungeProviderScreen extends StatefulWidget {
 class _BookingFormLoungeProviderScreenState
     extends State<BookingFormLoungeProviderScreen> {
   // In a real app these would be fetched from a service.
-  final List<Lounge> _lounges = [
-    Lounge(
-      documentId: '1',
-      name: 'Premium Lounge',
-      imageUrl: '',
-      category: ComboBox(type: "type", name: "name"),
-      pricePerHour: 500,
-      rating: 0,
-      reviewCount: 0,
-      description: '',
-    ),
-    Lounge(
-      documentId: '2',
-      name: 'Executive Lounge',
-      imageUrl: '',
-      category: ComboBox(type: "type", name: "name"),
-      pricePerHour: 800,
-      rating: 0,
-      reviewCount: 0,
-      description: '',
-    ),
-    Lounge(
-      documentId: '3',
-      name: 'Private Lounge',
-      imageUrl: '',
-      category: ComboBox(type: "type", name: "name"),
-      pricePerHour: 1000,
-      rating: 0,
-      reviewCount: 0,
-      description: '',
-    ),
-  ];
-
-  final List<Provider> _providers = [
-    Provider(
-      documentId: 'p1',
-      name: 'John Doe',
-      imageUrl: '',
-      category: ComboBox(type: "type", name: "name"),
-      pricePerHour: 220,
-      rating: 0,
-      reviewCount: 0,
-      description: '',
-      id: '',
-    ),
-    Provider(
-      documentId: 'p2',
-      name: 'Jane Smith',
-      imageUrl: '',
-      category: ComboBox(type: "type", name: "name"),
-      pricePerHour: 330,
-      rating: 0,
-      reviewCount: 0,
-      description: '',
-      id: '',
-    ),
-    Provider(
-      documentId: 'p3',
-      name: 'Jane Smith',
-      imageUrl: '',
-      category: ComboBox(type: "type", name: "name"),
-      pricePerHour: 440,
-      rating: 0,
-      reviewCount: 0,
-      description: '',
-      id: '',
-    ),
-  ];
-
+  // final List<Lounge> _lounges = [
+  //   Lounge(
+  //     documentId: '1',
+  //     name: 'Premium Lounge',
+  //     imageUrl: '',
+  //     category: ComboBox(type: "type", name: "name"),
+  //     pricePerHour: 500,
+  //     rating: 0,
+  //     reviewCount: 0,
+  //     description: '',
+  //   ),
+  //   Lounge(
+  //     documentId: '2',
+  //     name: 'Executive Lounge',
+  //     imageUrl: '',
+  //     category: ComboBox(type: "type", name: "name"),
+  //     pricePerHour: 800,
+  //     rating: 0,
+  //     reviewCount: 0,
+  //     description: '',
+  //   ),
+  //   Lounge(
+  //     documentId: '3',
+  //     name: 'Private Lounge',
+  //     imageUrl: '',
+  //     category: ComboBox(type: "type", name: "name"),
+  //     pricePerHour: 1000,
+  //     rating: 0,
+  //     reviewCount: 0,
+  //     description: '',
+  //   ),
+  // ];
+  // final List<Provider> _providers = [
+  //   Provider(
+  //     documentId: 'p1',
+  //     name: 'John Doe',
+  //     imageUrl: '',
+  //     category: ComboBox(type: "type", name: "name"),
+  //     pricePerHour: 220,
+  //     rating: 0,
+  //     reviewCount: 0,
+  //     description: '',
+  //     id: '',
+  //   ),
+  //   Provider(
+  //     documentId: 'p2',
+  //     name: 'Jane Smith',
+  //     imageUrl: '',
+  //     category: ComboBox(type: "type", name: "name"),
+  //     pricePerHour: 330,
+  //     rating: 0,
+  //     reviewCount: 0,
+  //     description: '',
+  //     id: '',
+  //   ),
+  //   Provider(
+  //     documentId: 'p3',
+  //     name: 'Jane Smith',
+  //     imageUrl: '',
+  //     category: ComboBox(type: "type", name: "name"),
+  //     pricePerHour: 440,
+  //     rating: 0,
+  //     reviewCount: 0,
+  //     description: '',
+  //     id: '',
+  //   ),
+  // ];
+  List<Lounge> _lounges = [];
+  List<Provider> _providers = [];
+  bool _isLoading = true;
   Lounge? _selectedLounge;
   final List<Provider> _selectedProviders = [];
 
@@ -260,6 +261,29 @@ class _BookingFormLoungeProviderScreenState
   }
 
   @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    try {
+      final lounges = await LoungeService().getLounges();
+      final providers = await ProviderService().getProviders();
+      setState(() {
+        _lounges = lounges;
+        _providers = providers;
+        _isLoading = false;
+      });
+    } catch (e) {
+      LogService.error('Failed to load lounges or providers: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     LogService.screenLoad('BookingFormLoungeProviderScreen');
     return Scaffold(
@@ -271,7 +295,11 @@ class _BookingFormLoungeProviderScreenState
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(color: Colors.amber),
+            )
+          : SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
