@@ -1,0 +1,12 @@
+name: lucide_icons
+description: A local override wrapper for lucide_icons to support modern Flutter IconData.
+version: 0.257.0
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_lucide: ^1.11.0
